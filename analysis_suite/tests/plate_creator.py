@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import analysis_suite.tests.galleria_creator as galleria
 
-def generate_fake_plate_image(max_bkg = 250, max_pixel = 8000, img_shape=(346, 464), plate_shape=(320, 430)):
+def generate_fake_plate_image(max_bkg = 250, max_pixel = 8000, plate_length = 280, plate_ratio= 0.67):
     """
     Generates a fake image with a plate that can be used to test detection
 
@@ -16,14 +16,22 @@ def generate_fake_plate_image(max_bkg = 250, max_pixel = 8000, img_shape=(346, 4
         Maximum pixel intensity for the background
     max_pixel : int
         Average maximum pixel used for gaussian randomly generate pixel values
-    img_shape : tuple
-        Tuple containing the dimensions of the image to be created
-    plate_shape : tuple
-        Rough external dimensions of plate to be created
+    plate_length : int
+        Length of the plate (y-axis)
+    plate_ratio : float
+        Ratio of length / width
+
+    Returns
+    ------
+    image : numpy array
+        A numpy array representing an image of a plate with galleria in wells
     """
+    plate_shape = tuple((plate_length, round(plate_length / plate_ratio)))
 
     # First generate the background of random pixel intensities
-    bkg = np.random.randint(max_bkg, size=img_shape)
+    img_shape = [int(val * 1.1) for val in plate_shape]
+    img_shape = tuple(img_shape)
+    image = np.random.randint(max_bkg, size=img_shape)
 
     # Generate the base of the plate - this needs to be slightly bigger (i.e. 5 pixels) than
     # the main plate face and lower pixel intensity
@@ -35,7 +43,7 @@ def generate_fake_plate_image(max_bkg = 250, max_pixel = 8000, img_shape=(346, 4
     y_half = int((img_shape[0] - base_shape[0]) / 2)
 
     # add the base shell to the background array
-    bkg[y_half:bkg.shape[0]-y_half,x_half:bkg.shape[1]-x_half] = plate_base
+    image[y_half:y_half+plate_base.shape[0],x_half:x_half+plate_base.shape[1]] = plate_base
 
     # Generate the plate itself - the corner cut offs need to be the same as the base
     plate_shell = generate_fake_plate(plate_shape=plate_shape, corner_pixel=(max_pixel*0.75), max_pixel=max_pixel, well_pixel=(max_pixel*0.25))
@@ -46,11 +54,14 @@ def generate_fake_plate_image(max_bkg = 250, max_pixel = 8000, img_shape=(346, 4
     y_half = int((img_shape[0] - plate_shape[0]) / 2)
 
     # add the plate shell to the background array
-    bkg[y_half:bkg.shape[0]-y_half,x_half:bkg.shape[1]-x_half] = plate_shell
+    image[y_half:y_half+plate_shell.shape[0],x_half:x_half+plate_shell.shape[1]]  = plate_shell
 
+    """
     plt.figure()
-    plt.imshow(bkg, cmap='gray')
+    plt.imshow(image, cmap='gray')
     plt.show()
+    """
+    return image
 
 def generate_fake_plate(corner_pixel = 3500, well_pixel = 2000, max_pixel = 7000, plate_shape=(300, 400), base=False):
     """
