@@ -7,6 +7,7 @@ Contains functions that load data
 import os
 import skimage.io as skio
 import analysis_suite.BR_reader.reader as biorad_reader
+import re
 
 def create_out_folder(folder):
     if os.path.isdir(os.path.join(folder, "results")):
@@ -53,24 +54,35 @@ def get_image_files(folder, plate_type = "green", exposure_time = "300"):
 
     Returns
     ------
-    files : list
+    all_files : list
         list where each entry is a list of two files ([BF_image, Fluo_image])
+    all_tpoints : list
+        list of timepoints as integers
     """
-
+    # get a list of all files
     files_of_interest = [file for file in os.listdir(folder) if plate_type in file]
+    # extract the timepoints (assuming the filename is in the format green_t0_....)
     tpoints = [file.split(" ")[1] for file in files_of_interest]
+    # keep only unique tpoints
     tpoints = set(tpoints)
 
     all_files = []
+    all_tpoints = []
     for t in sorted(tpoints):
         tpoint_files = []
         for file in files_of_interest:
-            if t not in file:
+            # if the timepoint doesn't match the file then skip
+            # Need to use this rather than "in file" for instances where t = 2
+            # and another time point is t=24 - ensures the whole number is in the file
+            if t != file.split(" ")[1]:
                 continue
+            # Get brightfield images
             if "image" in file:
                 tpoint_files.append(os.path.join(folder, file))
+            # Get fluo images with correct exposure
             if exposure_time in file:
                 tpoint_files.append(os.path.join(folder, file))
         all_files.append(sorted(tpoint_files, reverse=True))
-
-    return all_files
+        # Add the timepoint but drop the "t" so it is just an integer
+        all_tpoints.append(int(re.search(r'\d+',t).group()))
+    return all_files, all_tpoints

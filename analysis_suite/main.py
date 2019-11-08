@@ -14,6 +14,9 @@ import os
 import analysis_suite.tests.plate_creator as plate_creat
 import analysis_suite.data_loading as load
 import analysis_suite.output as output
+import analysis_suite.plotting as plotting
+from analysis_suite.well_class import AllWells
+import analysis_suite.data_editing as edit
 
 def run_batch(folder):
     """
@@ -24,15 +27,33 @@ def run_batch(folder):
     folder : list
         List with only one entry (the batch folder)
     """
+
+    # Create an instance of AllWells class
+    WellData = AllWells()
+
     if os.path.isdir(folder[0]):
-        all_files = load.get_image_files(folder[0])
-        for files in all_files:
-            print(files, flush=True)
+        # get a list of files and timepoints
+        all_files, all_tpoints = load.get_image_files(folder[0])
+        for files, tpoint in zip(all_files, all_tpoints):
+            # create output folder
             out_folder = load.create_out_folder(folder[0])
-            run_analysis(files, out_folder=out_folder)
+            # analyse a tpoint brightfield and fluorescent image
+            bio_dict = run_analysis(files, out_folder=out_folder)
+            # add info for each bacteria to the WellData class instance
+            for well, data_values in bio_dict.items():
+                WellData.add_well_info(well, tpoint=tpoint, area=data_values[0], mean_fluo=data_values[1], total_fluo=data_values[2])
+        # create dictionary of "plottable" dataframes where key is the info (i.e. measurement type)
+        # and value is the dataframe
+        WellData.create_dataframes()
+        for info, data in WellData.dataframes.items():
+            # plot dataframe of choice 
+            plotting.plot_interactive_chart(data)
+            plt.show()
     else:
-        # TODO: Need to make proper error logs
+        ### TODO: Need to make proper error logs
         print("not a folder!")
+
+
 
 
 def run_analysis(filename, out_folder=None):
@@ -55,19 +76,22 @@ def run_analysis(filename, out_folder=None):
         fluo_image = filename[1]
     else:
         fluo_image = None
-
     # Run plate detection
     labelled_plate = detect.detect_plate(img)
 
     if fluo_image:
+        # load fluo image
         fluo_image = load.load_image(fluo_image)
+        # extract well data from fluo image
         labelled_plate, bio_dict = detect.extract_biolum_values(labelled_plate, fluo_image)
+        #edit.filter_fluo_image(fluo_image, img, labelled_plate)
         output.save_img(out_folder, out_file, img, labelled_plate)
         output.save_dict(out_folder, out_file, bio_dict)
+        return bio_dict
 
 
 
-    ### # TODO: this can be removed as only used for development purposes and will
+    ### # TODO: below can be removed as only used for development purposes and will
     ### Eventually only be used in test suite
 
     # rect ratio = 0.67, hex ratio = 0.44
@@ -85,16 +109,3 @@ def run_analysis(filename, out_folder=None):
     from analysis_suite.plate_dimensions import Plate
     currentplate = Plate(well_type = "hex")
     currentplate.locate_wells(plate_mask)
-
-    """
-    plt.figure()
-    plt.imshow(currentplate.plate)
-    plt.show()
-
-    plt.figure()
-    plt.subplot(121)
-    plt.imshow(img, cmap='gray')
-    plt.subplot(122)
-    plt.imshow(plate, cmap='gray')
-    plt.show()
-    """
