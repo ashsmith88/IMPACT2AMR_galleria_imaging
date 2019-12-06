@@ -200,9 +200,17 @@ class Reader():
         instance attributes self.img_size_x and self.img_size_y
         """
         metadata = self.get_metadata_compact()
-        scn_metadata = metadata['Scan Header']['SCN']
-        self.img_size_x = self._first_region(scn_metadata, 'nxpix')
-        self.img_size_y = self._first_region(scn_metadata, 'nypix')
+        try:
+            scn_metadata = metadata['Scan Header']['SCN']
+            self.img_size_x = self._first_region(scn_metadata, 'nxpix')
+            self.img_size_y = self._first_region(scn_metadata, 'nypix')
+        except:
+            # added this in as the summary was giving the correct pixels when 
+            # the above was giving an error
+            summary = self.get_img_summary()
+            pixels = summary["Number Of Pixels"].strip("( )").split(" x ")
+            self.img_size_x = int(pixels[0])
+            self.img_size_y = int(pixels[1])
 
 
     def get_img_data(self, invert=False):

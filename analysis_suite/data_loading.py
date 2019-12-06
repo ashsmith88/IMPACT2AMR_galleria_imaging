@@ -16,7 +16,7 @@ def create_out_folder(folder):
     return os.path.join(folder, "results")
 
 def get_out_file(filename):
-    tpoint = filename.split(" ")[1]
+    tpoint = os.path.basename(filename).split(" ")[0]
     return "bioluminescence_reading_%s"%(tpoint)
 
 def load_image(filepath):
@@ -38,7 +38,7 @@ def load_image(filepath):
         loaded_image = img.get_image()
     return loaded_image
 
-def get_image_files(folder, plate_type = "green", exposure_time = "300"):
+def get_image_files(folder, exposure_time = "300"):
     """
     Takes a folder and returns a list of lists, where each sublist
     is a brightfield image followed by a fluorescence image
@@ -47,8 +47,6 @@ def get_image_files(folder, plate_type = "green", exposure_time = "300"):
     ------
     folder : str
         folder path
-    plate_type : str, optional
-        Specifies which plate we are analysing (default : green)
     exposure_time : str, optional
         The exposure time we want to get the data from
 
@@ -60,9 +58,10 @@ def get_image_files(folder, plate_type = "green", exposure_time = "300"):
         list of timepoints as integers
     """
     # get a list of all files
-    files_of_interest = [file for file in os.listdir(folder) if plate_type in file]
+    files_of_interest = [file for file in os.listdir(folder) if file.endswith('.1sc')]
+
     # extract the timepoints (assuming the filename is in the format green_t0_....)
-    tpoints = [file.split(" ")[1] for file in files_of_interest]
+    tpoints = [file.split(" ")[0] for file in files_of_interest]
     # keep only unique tpoints
     tpoints = set(tpoints)
 
@@ -74,7 +73,7 @@ def get_image_files(folder, plate_type = "green", exposure_time = "300"):
             # if the timepoint doesn't match the file then skip
             # Need to use this rather than "in file" for instances where t = 2
             # and another time point is t=24 - ensures the whole number is in the file
-            if t != file.split(" ")[1]:
+            if t != file.split(" ")[0]:
                 continue
             # Get brightfield images
             if "image" in file:

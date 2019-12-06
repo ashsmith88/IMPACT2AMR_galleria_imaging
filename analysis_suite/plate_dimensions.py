@@ -18,12 +18,12 @@ class Plate(object):
 
     def __init__(
             self,
-            well_type = "rect",
+            plate_type = "rect",
             ):
         """
         Attributes
         ------
-        well_type : str
+        plate_type : str
             Specifies which type of plate ("rect" or "hex")
         plate_dimensions : tuple
             2D Dimensions of the plate in mm (height (y), width (x))
@@ -37,13 +37,13 @@ class Plate(object):
             spacing between the start of each row of wells in mm
         """
 
-        self.well_type = well_type
+        self.plate_type = plate_type
 
-        self.set_well_type()
+        self.set_plate_type()
 
         # Hidden attributes
 
-    def set_well_type(self):
+    def set_plate_type(self):
         """
         Gets the correct plate information based on the well type selected
         """
@@ -53,6 +53,7 @@ class Plate(object):
         self._first_well = dimensions_dict["first_well"]
         self._col_space = dimensions_dict["col_space"]
         self._row_space = dimensions_dict["row_space"]
+        self._row_space_no_stagger = dimensions_dict["row_space_no_stagger"]
 
     def _get_correct_dimensions(self):
         """
@@ -61,14 +62,45 @@ class Plate(object):
         """
 
         hex_plate_50 = {"plate_dim":(85, 195), "well_dim":(17.5, 15), "first_well":(5, 12.92),
-            "col_space" : 17, "row_space" : 29}
+            "col_space" : 17, "row_space" : 29, "row_space_no_stagger" : 14.75} ## TODO: need to measure row space no stagger
         rect_plate_40 = {"plate_dim":(85.65, 127), "well_dim":(8, 20), "first_well":(3.83, 10.5),
-            "col_space" : 22.5, "row_space" : 10}
+            "col_space" : 22.5, "row_space" : 10, "row_space_no_stagger" : 10}
+        rect_plate_50 = {"plate_dim":(135, 140), "well_dim":(9, 21), "first_well":(5, 12.5),
+            "col_space" : 25, "row_space" : 13, "row_space_no_stagger" : 13}
 
-        if self.well_type == "rect":
+        if self.plate_type == "rect40":
             return rect_plate_40
-        elif self.well_type == "hex":
+        elif self.plate_type == "hex50":
             return hex_plate_50
+        elif self.plate_type == "rect50":
+            return rect_plate_50
+
+    def get_plate_corners(self, first_well_x, first_well_y, x_gap, y_gap):
+        """
+        Gets the plate corners based on the location of the first well and spacings
+
+        Parameters
+        ------
+        first_well_x : int
+            x pixel location of the top left corner of first well
+        first_well_y : int
+            y pixel location of the top left corner of first well
+        x_gap : int
+            gap between wells along the x axis (in pixels)
+        y_gap : int
+            gap between wells along the y axis (in pixels)
+        """
+        # First get the ratio
+        x_ratio = x_gap / self._col_space
+        y_ratio = y_gap / self._row_space_no_stagger
+        # get the top left corner based on the first well location and ratio
+        start_x = first_well_x - (self._first_well[1] * x_ratio)
+        start_y = first_well_y - (self._first_well[0] * y_ratio)
+        # get the bottom left corner based on the top left corner, plate dimensions and ratio
+        end_x = start_x + (self.plate_dimensions[1] * x_ratio)
+        end_y = start_y + (self.plate_dimensions[0] * y_ratio)
+
+        return int(start_x), int(end_x), int(start_y), int(end_y)
 
 
     def _calibrate_plate(self, plate_im=None):
@@ -82,7 +114,7 @@ class Plate(object):
         self._y_cal = self.plate_dimensions[0] / self.plate_dim_pixels[0]
         self._x_cal = self.plate_dimensions[1] / self.plate_dim_pixels[1]
 
-    def locate_wells(self, plate_im, well_type=None):
+    def locate_wells(self, plate_im, plate_type=None):
         """
         Takes the detected plate image, determines the location of the wells
         and creates a mask with these wells
@@ -98,8 +130,8 @@ class Plate(object):
         plate_im = plate_im - 1
 
         self._calibrate_plate(plate_im=plate_im)
-        if well_type:
-            self.set_well_type(well_type)
+        if plate_type:
+            self.set_plate_type(plate_type)
 
         # Get the location of the first well and its dimensions in pixels
         self._first_well_pixels = tuple((round(self._first_well[0] / self._y_cal), round(self._first_well[1] / self._x_cal)))
@@ -109,9 +141,9 @@ class Plate(object):
         x_vals, y_vals = self._get_well_pixel_locations(plate_im)
 
         #Generate the correct mask
-        if self.well_type is "rect":
+        if "rect" in self.plate_type:
             self.well_mask = np.zeros(self._well_dim_pixels) + 1
-        if self.well_type is "hex":
+        elif "hex" in self.plate_type:
             self.well_mask = self._create_hexagon(base_shape = self._well_dim_pixels)
             # for the hexagonal plate every other row is staggered so we need to calculate
             # the location of these rows separately by adding half of the x and y spacing to the first well
@@ -122,7 +154,7 @@ class Plate(object):
             plate_im = self._add_well_masks(plate_im, x_vals_staggered, y_vals_staggered)
 
         plate_im = self._add_well_masks(plate_im, x_vals, y_vals)
-        self.plate = plate_im
+        self.plate = plate_im + 1
 
     def _get_well_pixel_locations(self, plate_im, first_well_pix = None):
         """

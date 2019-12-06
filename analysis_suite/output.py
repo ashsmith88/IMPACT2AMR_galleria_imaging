@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 import os
 
-def save_img(folder, filename, img, labelled_plate):
+def save_img(folder, filename, img, labelled_plate, labelled_wells):
     """
     Saves an output image with the wells labelled
 
@@ -22,23 +22,29 @@ def save_img(folder, filename, img, labelled_plate):
     img : np.array
         The original image (brightfield)
     labelled_plate : labelled image
-        ndi labelled image from skimage.ndimage - where each well has a unique number starting from 2
-        as the background is also labelled
+        ndi labelled image where the plate (without the wells) is labelled as 1
+    labelled_wells : labelled image
+        ndi labelled image from skimage.ndimage - where each well has a unique number starting from 1
     """
     # create plot and show original image
     plt.figure()
     plt.imshow(img)
-    # loop through labelled image and plot the contours of each label
-    for well_lab in range(1, labelled_plate.max() + 1):
+    # loop through the labelled wels and plot the contours of each label
+    for well_lab in range(1, labelled_wells.max() + 1):
         # create colour for contour
         col = plt.cm.gist_rainbow((well_lab / 9.1) % 1)
         # plot contour
-        plt.contour(labelled_plate == well_lab, levels=[0.5], colors=[col])
+        plt.contour(labelled_wells == well_lab, levels=[0.5], colors=[col])
         # get the location of the well and find the top right corner in order to add the text label
-        bw0 = labelled_plate == well_lab
+        bw0 = labelled_wells == well_lab
         pos0 = bw0.nonzero()
         pos = (np.min(pos0[0]), np.max(pos0[1]))
         plt.text(pos[1], pos[0], str(well_lab), color=col)
+    # set the colour to one above the maximum number of the wells and use
+    # it to plot the contour of the plate outline
+    col = plt.cm.gist_rainbow(((labelled_wells.max()+1) / 9.1) % 1)
+    plt.contour(labelled_plate == 1, levels=[0.5], colors=[col])
+
     plt.savefig(os.path.join(folder, filename))
     plt.close()
 
