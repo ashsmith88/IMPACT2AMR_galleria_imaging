@@ -21,16 +21,13 @@ def extract_biolum_values(labelled_wells, fluo_image):
 
     Parameters
     ------
-    labelled_wells : binary array
-        Binary array, where wells and the background are 0 and the main plate is 1
+    labelled_wells : labelled image
+        ndi labelled image from skimage.ndimage - where each well has a unique number starting from 1
     fluo_image : array
         Array of the image containing the fluorescence information
 
     Returns
     ------
-    labelled_plate : labelled image
-        ndi labelled image from skimage.ndimage - where each well has a unique number starting from 2
-        as the background is also labelled
     bioluminescence_dict : dictionary
         Where key is the region label and value is a list of measurements [area, fluo, integarted fluo]
     """
@@ -67,7 +64,7 @@ def detect_plate(img, plate_type=None):
     # Generate plate
     currentplate = Plate(plate_type = plate_type)
 
-    start_x, start_y, x_gap, y_gap = get_first_well_and_gaps(img)
+    start_x, start_y, x_gap, y_gap = get_first_well_and_gaps(img, currentplate._no_rows, currentplate._no_columns)
 
     start_x, end_x, start_y, end_y = currentplate.get_plate_corners(start_x, start_y, x_gap, y_gap)
 
@@ -109,7 +106,7 @@ def detect_plate(img, plate_type=None):
     """
     return labelled_wells, labelled_plate
 
-def get_first_well_and_gaps(img):
+def get_first_well_and_gaps(img, nrows, ncols):
     """
     Converts the image into mean 1d profiles (vertical and horizontal, respectively).
     Then determines the difference between adjactent points, uses the upper 95 % to
@@ -132,20 +129,21 @@ def get_first_well_and_gaps(img):
     y_gap : int
         The spacing between vertical wells (in pixels)
     """
+    plt.figure()
+    plt.imshow(img)
     # get the mean of the x axis (1D profile)
     horiz_mean = np.mean(img, axis=0)
     # get the difference between adjacent pixels to exaggerate changes
     profile_diff = np.diff(horiz_mean)
     # get the x location of the top left corner of the first well and the well spacing
-    start_x, x_gap = find_first_well_and_gap(profile_diff, perc=90)
-
+    start_x, x_gap = find_first_well(profile_diff, ncols, perc=90)
     # repeat for y axis (rows of wells)
     vert_mean = np.mean(img, axis=1)
     profile_diff = np.diff(vert_mean)
-    start_y, y_gap = find_first_well_and_gap(profile_diff, perc=90)
+    start_y, y_gap = find_first_well(profile_diff, nrows, perc=90)
     return start_x, start_y, x_gap, y_gap
 
-def find_first_well_and_gap(profile, perc=90):
+def find_first_well(profile, num_peaks, perc=95):
     """
     Takes the 1D profile, determines the difference between points and identifies the major
     peaks, then identifies the first one which is regularly spaced
@@ -167,128 +165,50 @@ def find_first_well_and_gap(profile, perc=90):
     # we want to find when the image goes from "light" to "dark" so need to flip the values
     profile = np.negative(profile)
     # find the peaks
-    peaks, _ = find_peaks(profile, distance=20, prominence=np.percentile(np.absolute(profile), perc))
+    peaks, peak_dict = find_peaks(profile, distance=20, prominence=np.percentile(np.absolute(profile), perc))
+    peaks = np.array(peaks)
+    #Lets filter based on prominence to only get the number of peaks we need (number of rows or columns, respectively)
+    prominence = np.array(peak_dict["prominences"])
+
+    #remove all peaks with prominence less than 20% of the max prominence
+    # calculate half the max and create a mask which can be used to filter
+    half_max_prom = max(prominence) * 0.20
+    mask = prominence > half_max_prom
+    # We dont want to remove too many peaks, we need a minimum of 5 to carry on
+    if sum(mask) > 5:
+        # use mask to keep only those above half max
+        peaks = peaks[mask]
+        prominence = prominence[mask]
+
+    ### # TODO: For the hexagonal we will get more peaks that the number of columns because of the stagger?!
+    if len(prominence) > num_peaks:
+        top_peaks = sorted(prominence, reverse=True)[:num_peaks]
+    else:
+        top_peaks = prominence
+    ind_top_peaks = [ind for ind, prom in enumerate(prominence) if prom in top_peaks]
+    best_peaks = [peaks[ind] for ind in ind_top_peaks]
     # find spacing between peaks and calculate the median change
-    diff = np.diff(peaks)
-    med = np.median(np.diff(peaks))
+    diff = np.diff(best_peaks)
+    med = np.median(np.diff(best_peaks))
+
     # identify peaks which fall in a consistent gap range (added 20% to median to cover small variations)
     consistent_gaps = np.array(((med-(med*0.2)) < diff) & (diff < (med+(med*0.2))))
     # get the first gap
     first_gap = np.where(consistent_gaps == True)[0][0]
-    coord = peaks[first_gap]
+    coord = best_peaks[first_gap]
+
+    # using the first identified peak and the calculated gap, lets interpolate where we may find
+    # a missed peak
+    possible_missed = [(coord - (med * n)) for n in range(1, 10) if (coord - (med * n) > 0)]
+
+    # Now loop through the possible locations and see if any peaks were identified near there
+    for poss in possible_missed:
+        for peak in peaks:
+            if peak == coord:
+                continue
+            # if within 3 pixels we replace it as the first peak
+            if (poss - 3) <= peak <= (poss + 3):
+                coord = peak
+                continue
 
     return coord, med
-
-
-
-
-
-
-######## Old unused functions, but want to push before deleting in case I want them in future
-
-#def find_first_well_and_gap(profile):
-    """
-    Takes the 1D profile, determines the difference between points and identifies the first
-    and last major peaks
-
-    Parameters
-    ------
-    profile : np.array
-        1D array representing the mean pixel value along a given axis
-
-    Returns
-    ------
-    start : int
-        The first prominent peak along the respective axis
-    end : int
-        The last prominent trough along the respective axis
-    """
-
-    # get the difference between adjactent points
-#    profile_diff = np.diff(profile)
-
-#    first, med = test_function_first_well(profile_diff)
-
-    #print("IMPORTANT: %s, %s"%(first, med), flush=True)
-    #return first, med
-
-    #check_peaks(np.negative(profile_diff))
-    #return start, end
-
-
-def check_peaks(x, perc=90, end=False):
-
-    if end:
-        x = np.flipud(np.negative(x))
-
-    peaks, _ = find_peaks(x, distance=20, prominence=np.percentile(np.absolute(x), perc))
-    diff = np.diff(peaks)
-    med = np.median(np.diff(peaks))
-    mad = stats.median_absolute_deviation(np.diff(peaks))
-
-    #if mad == 0:
-#        mad = 1 #if it is too consistent (need to add a small mad just in case one is one pixel out)
-
-    consistent_gaps = np.array(((med-(med*0.1)) < diff) & (diff < (med+(med*0.1))))
-    first_gap = np.where(consistent_gaps == True)[0][0]
-    #last_gap = np.where(consistent_gaps == True)[0][-1]
-
-    peaks2, _ = find_peaks(x, prominence=np.percentile(np.absolute(x), perc))      # BEST!
-    peaks3, _ = find_peaks(x, width=20,prominence=np.percentile(np.absolute(x), perc))
-    peaks4, _ = find_peaks(x, threshold=0.4, prominence=np.percentile(np.absolute(x), perc))     # Required vertical distance to its direct neighbouring samples, pretty useless
-    plt.figure()
-    plt.subplot(2, 2, 1)
-    plt.plot(peaks, x[peaks], "xr"); plt.plot(x); plt.legend(['distance'])
-    #plt.subplot(2, 2, 2)
-    #plt.plot(peaks2, x[peaks2], "ob"); plt.plot(x); plt.legend(['prominence'])
-    #plt.subplot(2, 2, 3)
-    #plt.plot(peaks3, x[peaks3], "vg"); plt.plot(x); plt.legend(['width'])
-    #plt.subplot(2, 2, 4)
-    #plt.plot(peaks4, x[peaks4], "xk"); plt.plot(x); plt.legend(['threshold'])
-
-    if first_gap == 0:
-        plate_start = peaks[0]
-    else:
-        plate_start = peaks[first_gap-1]
-    if end:
-        return len(x) - plate_start
-    else:
-        return plate_start
-
-
-"""
-def get_best_peaks_by_ratio(start_x, end_x, start_y, end_y, xy_ratio, img_shape):
-    x_dict = {}
-    for x_st in start_x:
-        for x_en in end_x:
-            if x_en < x_st:
-                continue
-            if (x_en - x_st) < (img_shape[1] / 2):
-                continue
-            x_dict[(x_st, x_en)] = x_en - x_st
-    y_dict = {}
-    for y_st in start_y:
-        for y_en in end_y:
-            if y_en < y_st:
-                continue
-            y_dict[(y_st, y_en)] = y_en - y_st
-
-    combined_dict = {}
-    for key_x, value_x in x_dict.items():
-        for key_y, value_y in y_dict.items():
-            ratio = value_x / value_y
-            combined_dict[(key_x, key_y)] = abs(xy_ratio - ratio)
-    current_max = 0
-    current_key = None
-    for key, val in combined_dict.items():
-        if val < 0.1:
-            area = (key[0][1]-key[0][0]) * (key[1][1] - key[1][0])
-            if area > current_max:
-                current_max = area
-                current_key = key
-
-    best_combo = min(combined_dict, key=combined_dict.get)
-    best_combo = current_key
-
-    return best_combo[0][0], best_combo[0][1], best_combo[1][0], best_combo[1][1],
-"""

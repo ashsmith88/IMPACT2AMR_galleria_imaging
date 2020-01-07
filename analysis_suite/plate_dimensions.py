@@ -54,6 +54,8 @@ class Plate(object):
         self._col_space = dimensions_dict["col_space"]
         self._row_space = dimensions_dict["row_space"]
         self._row_space_no_stagger = dimensions_dict["row_space_no_stagger"]
+        self._no_columns = dimensions_dict["ncols"]
+        self._no_rows = dimensions_dict["nrows"]
 
     def _get_correct_dimensions(self):
         """
@@ -62,11 +64,11 @@ class Plate(object):
         """
 
         hex_plate_50 = {"plate_dim":(85, 195), "well_dim":(17.5, 15), "first_well":(5, 12.92),
-            "col_space" : 17, "row_space" : 29, "row_space_no_stagger" : 14.75} ## TODO: need to measure row space no stagger
+            "col_space" : 17, "row_space" : 29, "row_space_no_stagger" : 14.75, "nrows" : 10, "ncols" : 5} ## TODO: need to measure row space no stagger
         rect_plate_40 = {"plate_dim":(85.65, 127), "well_dim":(8, 20), "first_well":(3.83, 10.5),
-            "col_space" : 22.5, "row_space" : 10, "row_space_no_stagger" : 10}
+            "col_space" : 22.5, "row_space" : 10, "row_space_no_stagger" : 10, "nrows" : 8, "ncols" : 5}
         rect_plate_50 = {"plate_dim":(135, 140), "well_dim":(9, 21), "first_well":(5, 12.5),
-            "col_space" : 25, "row_space" : 13, "row_space_no_stagger" : 13}
+            "col_space" : 25, "row_space" : 13, "row_space_no_stagger" : 13, "nrows" : 10, "ncols" : 5}
 
         if self.plate_type == "rect40":
             return rect_plate_40

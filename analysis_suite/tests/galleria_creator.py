@@ -60,7 +60,7 @@ def well_with_galleria(well, galleria_pixel = 5000):
     well_mask_filled = morph.binary_fill_holes(edges2)
 
     # create an array of randomly generated pixel values the same size as the well
-    whole_well_bright = np.random.normal(loc=1, scale=0.05, size=(well_height, well_width)) * galleria_pixel
+    whole_well_bright = np.random.normal(loc=1, scale=0.4, size=(well_height, well_width)) * galleria_pixel
 
     # Use the mask to set the equivalent area in the well to the pixel values from the bright well
     well[well_mask_filled == 1] = whole_well_bright[well_mask_filled == 1]

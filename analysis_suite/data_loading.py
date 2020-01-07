@@ -38,7 +38,7 @@ def load_image(filepath):
         loaded_image = img.get_image()
     return loaded_image
 
-def get_image_files(folder, exposure_time = "300"):
+def get_image_files(folder, exposure_time = "300", filetype=".1sc"):
     """
     Takes a folder and returns a list of lists, where each sublist
     is a brightfield image followed by a fluorescence image
@@ -58,7 +58,7 @@ def get_image_files(folder, exposure_time = "300"):
         list of timepoints as integers
     """
     # get a list of all files
-    files_of_interest = [file for file in os.listdir(folder) if file.endswith('.1sc')]
+    files_of_interest = [file for file in os.listdir(folder) if file.endswith(filetype)]
 
     # extract the timepoints (assuming the filename is in the format green_t0_....)
     tpoints = [file.split(" ")[0] for file in files_of_interest]
@@ -81,6 +81,8 @@ def get_image_files(folder, exposure_time = "300"):
             # Get fluo images with correct exposure
             if exposure_time in file:
                 tpoint_files.append(os.path.join(folder, file))
+        if len(tpoint_files) == 0:
+            continue
         all_files.append(sorted(tpoint_files, reverse=True))
         # Add the timepoint but drop the "t" so it is just an integer
         all_tpoints.append(int(re.search(r'\d+',t).group()))

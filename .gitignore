@@ -1,0 +1,24 @@
+*.pyc
+*~
+*.so
+*.pyd
+*.bak
+*.c
+*.log
+*.swp
+*.prof
+*.jpg
+*.png
+*.tif
+*.csv
+build/
+dist/
+*.egg-info/
+**/Thumbs.db        // Stupid windows thumbnail file... :/
+.coverage
+htmlcov/
+test_phase_detection*
+lib/
+.cache/
+.eggs/
+.mypy_cache/
