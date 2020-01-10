@@ -77,7 +77,7 @@ class Plate(object):
         elif self.plate_type == "rect50":
             return rect_plate_50
 
-    def get_plate_corners(self, first_well_x, first_well_y, x_gap, y_gap):
+    def get_plate_corners(self, first_well_x, first_well_y, x_gap, y_gap=None):
         """
         Gets the plate corners based on the location of the first well and spacings
 
@@ -94,7 +94,10 @@ class Plate(object):
         """
         # First get the ratio
         x_ratio = x_gap / self._col_space
-        y_ratio = y_gap / self._row_space_no_stagger
+        if y_gap:
+            y_ratio = y_gap / self._row_space_no_stagger
+        else:
+            y_ratio = x_ratio
         # get the top left corner based on the first well location and ratio
         start_x = first_well_x - (self._first_well[1] * x_ratio)
         start_y = first_well_y - (self._first_well[0] * y_ratio)

@@ -44,7 +44,7 @@ def save_img(folder, filename, img, labelled_plate, labelled_wells):
     # it to plot the contour of the plate outline
     col = plt.cm.gist_rainbow(((labelled_wells.max()+1) / 9.1) % 1)
     plt.contour(labelled_plate == 1, levels=[0.5], colors=[col])
-
+    #plt.show()
     plt.savefig(os.path.join(folder, filename))
     plt.close()
 

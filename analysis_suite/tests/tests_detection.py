@@ -76,10 +76,10 @@ class TestGetFirstWellAndGaps(unittest.TestCase):
     """
 
     def setUp(self):
-        self.img50_hex = generate_fake_plate_image(plate_length = 180, plate_ratio = 0.4, hex=True, n_ver=10)
+        self.img50_hex = generate_fake_plate_image(plate_length = 200, plate_ratio = 0.436, hex=True, n_ver=10)
         self.img40_well = generate_fake_plate_image(plate_length = 280, plate_ratio = 0.67)
-        self.img50_well = generate_fake_plate_image(plate_length = 280, plate_ratio = 1, n_ver = 10)
-    """
+        self.img50_well = generate_fake_plate_image(plate_length = 280, plate_ratio = 0.96, n_ver = 10)
+
     def test_get_first_well_and_gaps_40_well(self):
         start_x, start_y, x_gap, y_gap = detect.get_first_well_and_gaps(self.img40_well, 8, 5)
         self.assertTrue(62 <= start_x <= 64)
@@ -87,17 +87,17 @@ class TestGetFirstWellAndGaps(unittest.TestCase):
         self.assertTrue(75 <= x_gap <= 77)
         self.assertTrue(33 <= y_gap <= 35)
 
+
     def test_get_first_well_and_gaps_50_well(self):
         start_x, start_y, x_gap, y_gap = detect.get_first_well_and_gaps(self.img50_well, 10, 5)
-        self.assertTrue(118 <= start_x <= 120)
+        self.assertTrue(112 <= start_x <= 116)
         self.assertTrue(38 <= start_y <= 40)
-        self.assertTrue(50 <= x_gap <= 52)
+        self.assertTrue(52 <= x_gap <= 54)
         self.assertTrue(27 <= y_gap <= 29)
-    """
-    def test_get_first_well_and_gaps_50_hex(self):
-        start_x, start_y, x_gap, y_gap = detect.get_first_well_and_gaps(self.img50_hex, 10, 5)
-        print(start_x, start_y, x_gap, y_gap, flush=True)
-        import matplotlib.pyplot as plt
-        plt.figure()
-        plt.imshow(self.img50_hex)
-        plt.show()
+
+    def test_get_hex_plate_corners(self):
+        start_x, end_x, start_y, end_y = detect.get_corners_from_edges(self.img50_hex)
+        self.assertTrue(16 <= start_x <= 20)
+        self.assertTrue(58 <= start_y <= 60)
+        self.assertTrue(441 <= end_x <= 445)
+        self.assertTrue(282 <= end_y <= 286)

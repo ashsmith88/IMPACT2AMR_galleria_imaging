@@ -35,19 +35,6 @@ def generate_fake_plate_image(max_bkg = 7000, max_pixel = 25000, plate_length = 
     img_shape = ((346, 464))#tuple(img_shape)
     image = np.random.randint(max_bkg, size=img_shape)
 
-    """
-    # Generate the base of the plate - this needs to be slightly bigger (i.e. 5 pixels) than
-    # the main plate face and lower pixel intensity
-    base_shape = tuple(np.array(plate_shape) + 10)
-    plate_base = generate_fake_plate(plate_shape=base_shape, max_pixel=(max_pixel*0.75), base=True)
-
-    # Need to find the difference between the plate base and the image outline to locate it centrally
-    x_half = int((img_shape[1] - base_shape[1]) / 2)
-    y_half = int((img_shape[0] - base_shape[0]) / 2)
-
-    # add the base shell to the background array
-    image[y_half:y_half+plate_base.shape[0],x_half:x_half+plate_base.shape[1]] = plate_base
-    """
 
     # Generate the plate itself - the corner cut offs need to be the same as the base
     plate_shell = generate_fake_plate(plate_shape=plate_shape, max_pixel=max_pixel, well_pixel=max_bkg,
@@ -55,17 +42,12 @@ def generate_fake_plate_image(max_bkg = 7000, max_pixel = 25000, plate_length = 
 
     # Need to find the difference between the plate and the image shapes so we can
     # put the plate in the centre of the image
-    x_half = int((img_shape[1] - plate_shape[1]) / 2)
-    y_half = int((img_shape[0] - plate_shape[0]) / 2)
+    x_half = int((img_shape[1] - plate_shell.shape[1]) / 2)
+    y_half = int((img_shape[0] - plate_shell.shape[0]) / 2)
 
     # add the plate shell to the background array
     image[y_half:y_half+plate_shell.shape[0],x_half:x_half+plate_shell.shape[1]]  = plate_shell
 
-    """
-    plt.figure()
-    plt.imshow(image, cmap='gray')
-    plt.show()
-    """
     return image
 
 def generate_fake_plate(corner_pixel = 3500, well_pixel = 7000, max_pixel = 25000, plate_shape=(300, 400), base=False, corners=False, n_ver=8, hex=False):
