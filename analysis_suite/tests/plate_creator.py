@@ -31,6 +31,7 @@ def generate_fake_plate_image(max_bkg = 7000, max_pixel = 25000, plate_length = 
     """
     plate_shape = tuple((plate_length, round(plate_length / plate_ratio)))
 
+
     # First generate the background of random pixel intensities
     img_shape = ((346, 464))#tuple(img_shape)
     image = np.random.randint(max_bkg, size=img_shape)
@@ -47,6 +48,7 @@ def generate_fake_plate_image(max_bkg = 7000, max_pixel = 25000, plate_length = 
 
     # add the plate shell to the background array
     image[y_half:y_half+plate_shell.shape[0],x_half:x_half+plate_shell.shape[1]]  = plate_shell
+
 
     return image
 
@@ -83,7 +85,7 @@ def generate_fake_plate(corner_pixel = 3500, well_pixel = 7000, max_pixel = 2500
     else:
         plate_shell = add_rectangular_wells_in_plate(plate_shell, well_pixel=well_pixel, galleria_pixel=max_pixel, n_ver=n_ver)
 
-    import matplotlib.pyplot as plt
+    #import matplotlib.pyplot as plt
     #plt.figure()
     #plt.imshow(plate_shell)
     #plt.show()

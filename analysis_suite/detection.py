@@ -156,13 +156,15 @@ def move_plate_mask(start_x, end_x, gap_x, start_y, end_y, gap_y, img):
         start_y -= gap_y
 
     # Now loop through and see if any shifts mean we hit the possible starts we identified
-    #for n in range(0, 5):
-    #    if ((start_x - (gap_x*n) - 5) <= poss_x_start <= (start_x - (gap_x*n) + 5)):
-    #        start_x -= (gap_x*n)
-    #        end_x -= (gap_x*n)
-    #        continue
-    ### We probably only need to do this for y axis as the column splits are a lot more "obvious"
+    # N.B. We probably only need to do this for y axis as the column splits are a lot more "obvious"
     # so we usually detect it quite accurately
+    """
+    for n in range(0, 5):
+        if ((start_x - (gap_x*n) - 5) <= poss_x_start <= (start_x - (gap_x*n) + 5)):
+            start_x -= (gap_x*n)
+            end_x -= (gap_x*n)
+            continue
+    """
     for n in range(0, 5):
         if ((start_y - (gap_y*n) - 5) <= poss_y_start <= (start_y - (gap_y*n) + 5)):
             start_y -= (gap_y*n)
