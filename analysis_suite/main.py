@@ -6,7 +6,8 @@ Runs the main pipeline
 # AUTHOR      : A. Smith  <A.Smith@biosystemstechnology.com>
 
 import analysis_suite.data_loading as load
-import analysis_suite.detection as detect
+import analysis_suite.detection.plate_detection as plate_detection
+import analysis_suite.measurements as meas
 import matplotlib.pyplot as plt
 import os
 
@@ -80,13 +81,13 @@ def run_analysis(filename, plate_type, out_folder=None):
     img = load.load_image(bf_image_file)
     out_file = load.get_out_file(bf_image_file)
     # Run plate detection
-    labelled_wells, labelled_plate = detect.detect_plate(img, plate_type=plate_type)
+    labelled_wells, labelled_plate = plate_detection.detect_plate(img, plate_type=plate_type)
 
     if fluo_image_file:
         # load fluo image
         fluo_image = load.load_image(fluo_image_file)
         # extract well data from fluo image
-        bio_dict = detect.extract_biolum_values(labelled_wells, fluo_image)
+        bio_dict = meas.extract_biolum_values(labelled_wells, fluo_image)
         #edit.filter_fluo_image(fluo_image, img, labelled_plate)
         output.save_img(out_folder, out_file, img, labelled_plate, labelled_wells)
         output.save_dict(out_folder, out_file, bio_dict)
