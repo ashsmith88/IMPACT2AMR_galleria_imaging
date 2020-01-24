@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import os
+from skimage import exposure
 from skimage.color import label2rgb, gray2rgb
 import skimage.io as skio
 import scipy.ndimage as ndi
@@ -31,10 +32,16 @@ def save_img(folder, filename, img, labelled_plate, labelled_wells, labelled_gal
     """
     # create plot and show original image
     filename = filename + ".jpg"
-    contours = labelled_wells * ~ndi.binary_erosion(labelled_wells>0, iterations=5)
-    contours[contours == 0] = -1
-    img = label2rgb(contours, gray2rgb(img))
-    skio.imsave(os.path.join(folder, filename), (255*img).astype('uint8'))
+    contours = labelled_wells * ~ndi.binary_erosion(
+            labelled_wells > 0, iterations = 5)
+    img = img.astype(float)
+    img -= img.min()
+    img /= img.max()
+    img = exposure.equalize_adapthist(img, clip_limit=0.03)
+    labs = label2rgb(contours, bg_label=0)
+    imgout = gray2rgb(img)
+    imgout[contours > 0] = labs[contours > 0]
+    skio.imsave(os.path.join(folder, filename), (255*imgout).astype('uint8'))
     """
     for well_lab in range(1, labelled_wells.max() + 1):
         # create colour for contour
