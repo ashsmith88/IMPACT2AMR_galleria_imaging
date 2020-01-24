@@ -49,9 +49,6 @@ def run_batch(folder, plate_type):
         ### TODO: Need to make proper error logs
         print("not a folder!")
 
-
-
-
 def run_analysis(filename, plate_type, out_folder=None):
     """
     Runs the main analysis pipeline
