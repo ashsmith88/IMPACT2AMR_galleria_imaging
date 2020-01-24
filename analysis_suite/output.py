@@ -32,8 +32,9 @@ def save_img(folder, filename, img, labelled_plate, labelled_wells, labelled_gal
     # create plot and show original image
     filename = filename + ".jpg"
     contours = labelled_wells * ~ndi.binary_erosion(labelled_wells>0, iterations=5)
+    contours[contours == 0] = -1
     img = label2rgb(contours, gray2rgb(img))
-    skio.imsave(os.path.join(folder, filename), img)
+    skio.imsave(os.path.join(folder, filename), (255*img).astype('uint8'))
     """
     for well_lab in range(1, labelled_wells.max() + 1):
         # create colour for contour
