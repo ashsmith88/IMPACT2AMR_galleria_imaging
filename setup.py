@@ -34,6 +34,7 @@ class CoverageCommand(Command):
         omitfiles = [
             os.path.join(MODNAME, "tests", "*"),
             os.path.join(MODNAME, "__main__.py"),
+            os.path.join(MODNAME, "BR_reader", "*")
         ]
         for r, dirs, files in os.walk(MODNAME):
             omitfiles.extend(

@@ -4,6 +4,7 @@ well_class.py file for analysis_suite
 Contains a class for storing time series information on each well
 """
 import pandas as pd
+import numpy as np
 
 class AllWells(object):
     """
@@ -60,9 +61,11 @@ class AllWells(object):
             self.tpoints = sorted(self.wells[1].__dict__[att])
             for well in self.wells.keys():
                 # add the measurement for each well for each timepoint to a list
-                data_dict[well] = [self.wells[well].__dict__[att][tpo] for tpo in self.tpoints]
+                # empty tpoints set to np.nan - ## TODO: review if this is right
+                data_dict[well] = [self.wells[well].__dict__[att][tpo] if tpo in self.wells[well].__dict__[att].keys() else np.nan for tpo in self.tpoints]
             # create dataframe for the dictionary
             self.dataframes[att] = pd.DataFrame.from_dict(data_dict, orient='index', columns=self.tpoints)
+
 
 class SingleWell(object):
     """

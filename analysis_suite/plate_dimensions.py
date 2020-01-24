@@ -18,7 +18,7 @@ class Plate(object):
 
     def __init__(
             self,
-            plate_type = "rect",
+            plate_type = "rect40",
             ):
         """
         Attributes
@@ -77,7 +77,7 @@ class Plate(object):
         elif self.plate_type == "rect50":
             return rect_plate_50
 
-    def get_plate_corners(self, first_well_x, first_well_y, x_gap, y_gap=None):
+    def get_plate_corners(self, first_well_x, first_well_y, x_gap, y_gap):
         """
         Gets the plate corners based on the location of the first well and spacings
 
@@ -94,10 +94,7 @@ class Plate(object):
         """
         # First get the ratio
         x_ratio = x_gap / self._col_space
-        if y_gap:
-            y_ratio = y_gap / self._row_space_no_stagger
-        else:
-            y_ratio = x_ratio
+        y_ratio = y_gap / self._row_space_no_stagger
         # get the top left corner based on the first well location and ratio
         start_x = first_well_x - (self._first_well[1] * x_ratio)
         start_y = first_well_y - (self._first_well[0] * y_ratio)
@@ -136,7 +133,8 @@ class Plate(object):
 
         self._calibrate_plate(plate_im=plate_im)
         if plate_type:
-            self.set_plate_type(plate_type)
+            self.plate_type = plate_type
+            self.set_plate_type()
 
         # Get the location of the first well and its dimensions in pixels
         self._first_well_pixels = tuple((round(self._first_well[0] / self._y_cal), round(self._first_well[1] / self._x_cal)))
@@ -246,10 +244,10 @@ class Plate(object):
         # Set each coordinate in the list to 0
         for coords in all_coords:
             for coo_ in coords:
-                try:
-                    rect_base[coo_] = 0
-                except:
-                    print(coo_)
+                #try:
+                rect_base[coo_] = 0
+                #except:
+                #    print(coo_)
 
         # return rotated hexagon
         return np.rot90(rect_base)

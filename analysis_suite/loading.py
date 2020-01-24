@@ -8,6 +8,9 @@ import os
 import skimage.io as skio
 import analysis_suite.BR_reader.reader as biorad_reader
 import re
+import numpy as np
+from skimage.external import tifffile
+
 
 def create_out_folder(folder):
     if os.path.isdir(os.path.join(folder, "results")):
@@ -33,12 +36,32 @@ def load_image(filepath):
     img : ndarray
         The image
     """
-    if os.path.isfile(filepath):
+    if filepath.lower().endswith("tif"):
+        loaded_image = load_tiff_file(filepath)
+    elif filepath.lower().endswith("1sc"):
         img = biorad_reader.Reader(filepath)
         loaded_image = img.get_image()
+        loaded_image = np.array(loaded_image)
     return loaded_image
 
-def get_image_files(folder, exposure_time = "300", filetype=".1sc"):
+def load_tiff_file(filepath):
+    """
+    Takes a filepath and loads the tiff image
+
+    Parameters
+    ------
+    filepath : str
+        Path to the image file
+
+    Returns
+    ------
+    img : ndarray
+        The image
+    """
+    return tifffile.imread(filepath)
+
+
+def get_image_files(folder, exposure_time = "300", filetype=".tif"):
     """
     Takes a folder and returns a list of lists, where each sublist
     is a brightfield image followed by a fluorescence image

@@ -6,7 +6,7 @@ import unittest
 import os
 import shutil
 import tempfile
-from analysis_suite import data_loading as load
+from analysis_suite import loading as load
 
 class TestOutputFileAndFolder(unittest.TestCase):
     """

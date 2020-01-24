@@ -34,13 +34,6 @@ def detect_plate(img, plate_type=None):
         An array which has been labelled using ndi, with the whole plate face (excluding wells) labelled as 1
     """
 
-    img = np.array(img)
-
-    """
-    from skimage.filters import sobel
-    # # TODO:  Sobel looks like it could be useful for galleria detection
-    """
-
     # Generate plate
     currentplate = Plate(plate_type = plate_type)
 
@@ -55,7 +48,7 @@ def detect_plate(img, plate_type=None):
     # create mask the size of the bbox
     plate_mask = np.zeros(((end_y - start_y), (end_x - start_x)))
     # locate the wells
-    currentplate.locate_wells(plate_mask)
+    currentplate.locate_wells(plate_mask, plate_type=plate_type)
     # If the first wells have been missed the plate is likely to still be the right size, but be slightly off
     # this can mean that the mask will be "stamped" off the edge of the image - as well as causing an error
     # this is wrong! lets check and move the mask back in the image (by the x/y gaps) if needed.

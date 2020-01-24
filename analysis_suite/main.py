@@ -5,19 +5,17 @@ Runs the main pipeline
 """
 # AUTHOR      : A. Smith  <A.Smith@biosystemstechnology.com>
 
-import analysis_suite.data_loading as load
+import analysis_suite.loading as load
 import analysis_suite.detection.plate_detection as plate_detection
+import analysis_suite.detection.galleria_detection as galleria_detection
 import analysis_suite.measurements as meas
 import matplotlib.pyplot as plt
 import os
 
 ### TODO: importing temporarily but need to set up test running properly
 import analysis_suite.tests.plate_creator as plate_creat
-import analysis_suite.data_loading as load
 import analysis_suite.output as output
-import analysis_suite.plotting as plotting
 from analysis_suite.well_class import AllWells
-import analysis_suite.data_editing as edit
 
 def run_batch(folder, plate_type):
     """
@@ -46,11 +44,7 @@ def run_batch(folder, plate_type):
         # create dictionary of "plottable" dataframes where key is the info (i.e. measurement type)
         # and value is the dataframe
         WellData.create_dataframes()
-        for info, data in WellData.dataframes.items():
-            # plot dataframe of choice
-            plotting.plot_interactive_chart(data)
-            plt.close()
-            #plt.show()
+        ### # TODO: Need a save dataframe option
     else:
         ### TODO: Need to make proper error logs
         print("not a folder!")
@@ -68,7 +62,8 @@ def run_analysis(filename, plate_type, out_folder=None):
         A list of filenames to analyse
     """
     ### TODO: need to review if we want input as list or individual string
-
+    from timeit import default_timer as timer
+    start = timer()
     # TODO: review this as only temporary solution
     if isinstance(filename, list):
         fluo_image_file = filename[1]
@@ -77,18 +72,21 @@ def run_analysis(filename, plate_type, out_folder=None):
         fluo_image_file = None
         bf_image_file = filename
 
-    # Load the first image
+    # Load the first image as a numpy array
     img = load.load_image(bf_image_file)
     out_file = load.get_out_file(bf_image_file)
     # Run plate detection
     labelled_wells, labelled_plate = plate_detection.detect_plate(img, plate_type=plate_type)
+    well_dict, labelled_gall = galleria_detection.detect_galleria(img, labelled_wells)
 
     if fluo_image_file:
         # load fluo image
         fluo_image = load.load_image(fluo_image_file)
         # extract well data from fluo image
+        ## TODO: need to extract this on galleria only?
         bio_dict = meas.extract_biolum_values(labelled_wells, fluo_image)
-        #edit.filter_fluo_image(fluo_image, img, labelled_plate)
-        output.save_img(out_folder, out_file, img, labelled_plate, labelled_wells)
+        output.save_img(out_folder, out_file, img, labelled_plate, labelled_wells, labelled_gall)
         output.save_dict(out_folder, out_file, bio_dict)
+        end = timer()
+        print(end-start, flush=True)
         return bio_dict
