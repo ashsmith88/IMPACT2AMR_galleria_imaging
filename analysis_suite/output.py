@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import os
+from PIL import Image, ImageDraw, ImageFont
 from skimage import exposure
 from skimage.color import label2rgb, gray2rgb
 import skimage.io as skio
@@ -38,10 +39,25 @@ def save_img(folder, filename, img, labelled_plate, labelled_wells, labelled_gal
     img -= img.min()
     img /= img.max()
     img = exposure.equalize_adapthist(img, clip_limit=0.03)
-    labs = label2rgb(contours, bg_label=0)
-    imgout = gray2rgb(img)
-    imgout[contours > 0] = labs[contours > 0]
-    skio.imsave(os.path.join(folder, filename), (255*imgout).astype('uint8'))
+    # labs = label2rgb(contours, bg_label=0)
+    # imgout[contours > 0] = labs[contours > 0]
+    img = (255 * gray2rgb(img)).astype('uint8')
+    img[contours > 0] = (255, 255, 0)
+    font = ImageFont.truetype("DejaVuSans.ttf", 28)
+    pilim = Image.fromarray(img)
+    pildraw = ImageDraw.ImageDraw(pilim)
+    for lab in range(1, contours.max() + 1):
+        coord = (contours == lab).nonzero()
+        coord = [dim.min() for dim in coord]
+        text = f"{lab}"
+        txtsize = font.getsize(text)
+        pildraw.text(
+            (coord[1]-txtsize[0]-4, coord[0]-txtsize[1]),
+            text,
+            fill=(255, 255, 0),
+            font=font)
+    # skio.imsave(os.path.join(folder, filename), (255*imgout).astype('uint8'))
+    pilim.save(os.path.join(folder, filename))
     """
     for well_lab in range(1, labelled_wells.max() + 1):
         # create colour for contour
