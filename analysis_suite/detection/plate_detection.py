@@ -82,6 +82,8 @@ def detect_plate_rotation(img):
         if angle is not False:
             # Keep all the correct angles
             angles.append(angle)
+    if len(angles) == 0:
+        return 0 # # TODO: need to check why its 0 and improve above algorithm
     # rotate the image by the median angle
     angle = np.median(np.array(angles))
 
@@ -171,7 +173,7 @@ def detect_plate(img, plate_type=None):
     if "hex" in plate_type:
         # Because the Hexagonal plates are staggered and not straight ridges between wells, the
         # start/end of the plates are really clear - lets try and detect them directly
-        start_x, end_x, start_y, end_y = get_corners_from_edges(img) 
+        start_x, end_x, start_y, end_y = get_corners_from_edges(img)
     else:
         start_x, start_y, x_gap, y_gap = get_first_well_and_gaps(img, currentplate._no_rows, currentplate._no_columns, plate_type=plate_type)
         start_x, end_x, start_y, end_y = currentplate.get_plate_corners(start_x, start_y, x_gap, y_gap)
