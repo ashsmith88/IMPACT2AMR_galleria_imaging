@@ -9,6 +9,58 @@ from analysis_suite.tests.plate_creator import generate_fake_plate_image
 import analysis_suite.tests.galleria_creator as galleria
 import skimage.measure as skmeas
 import matplotlib.pyplot as plt
+import scipy.ndimage as ndi
+
+class TestRotatePlate(unittest.TestCase):
+    """
+    Tests the plate rotation functions
+    """
+    def setUp(self):
+        self.img50_well = generate_fake_plate_image(plate_length = 280, plate_ratio = 0.96, n_ver = 10)
+        self.angles = [-3, -2, -1, 1, 2, 3]
+
+    def test_detect_plate_rotation(self):
+        for angle in self.angles:
+            rotated_plate = ndi.rotate(self.img50_well, angle, mode='reflect')
+            detected_angle = plate_detection.detect_plate_rotation(rotated_plate)
+            self.assertTrue(-(angle+0.25) <= detected_angle <= -(angle-0.25))
+
+class TestResizeImage(unittest.TestCase):
+    """
+    Test function for resizing the image
+    """
+
+    def setUp(self):
+        self.image_400 = np.zeros((400, 400))
+        self.image_1600 = np.zeros((1600, 1600))
+        self.image_200 = np.zeros((200, 200))
+
+    def test_resize_image_no_change(self):
+        image = plate_detection.resize_image(self.image_400)
+        np.testing.assert_array_equal(image, self.image_400)
+
+    def test_resize_image_no_change(self):
+        image = plate_detection.resize_image(self.image_1600)
+        np.testing.assert_array_equal(image, self.image_400)
+
+    def test_resize_image_small(self):
+        image = plate_detection.resize_image(self.image_200)
+        np.testing.assert_array_equal(image, self.image_200)
+
+class TestAdjustAngle(unittest.TestCase):
+    """
+    Test function for getting the adjusted angles
+    """
+
+    def setUp(self):
+        self.in_angles = [0, 35, 88, 182, 270, 357]
+        self.out_angles = [0, False, -2, 2, 0, -3]
+
+    def test_adjust_angles(self):
+        for in_ang, out_ang in zip(self.in_angles, self.out_angles):
+            new_angle = plate_detection.adjust_angle(in_ang)
+            self.assertEqual(out_ang, new_angle)
+
 
 class TestDetectPlate(unittest.TestCase):
     """

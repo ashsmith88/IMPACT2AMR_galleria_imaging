@@ -14,7 +14,7 @@ from scipy.special import binom
 import matplotlib.pyplot as plt
 import numpy as np
 
-def well_with_galleria(well, galleria_pixel = 5000):
+def well_with_galleria(well, galleria_pixel = 5000, return_label=False):
     """
     Generates fake galleria inside a well
 
@@ -64,6 +64,9 @@ def well_with_galleria(well, galleria_pixel = 5000):
 
     # Use the mask to set the equivalent area in the well to the pixel values from the bright well
     well[well_mask_filled == 1] = whole_well_bright[well_mask_filled == 1]
+
+    if return_label:
+        return well, well_mask_filled
 
     return well
 

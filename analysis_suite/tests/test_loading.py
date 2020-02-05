@@ -75,7 +75,7 @@ class TestGetImageFiles(unittest.TestCase):
         self.tpoints = [0, 5]
 
     def test_get_image_files_300(self):
-        out_files, out_tpoints = load.get_image_files(self.folder)
+        out_files, out_tpoints = load.get_image_files(self.folder, exposure_time='300', filetype=".1sc")
         self.assertEqual(out_files, self.outfile_300)
         self.assertEqual(out_tpoints, self.tpoints)
 

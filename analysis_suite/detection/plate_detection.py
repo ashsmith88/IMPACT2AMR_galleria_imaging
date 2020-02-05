@@ -12,8 +12,131 @@ import scipy.ndimage as ndi
 from scipy import stats
 from skimage.measure import regionprops
 import numpy as np
+from skimage.transform import probabilistic_hough_line
+import skimage.morphology as skmorph
+import math
+from skimage.transform import resize
+#from skimage.feature import canny
 
 from analysis_suite.plate_dimensions import Plate
+
+def straighten_plate(img): # pragma: no cover
+    """
+    Takes the original image, determines the angle the plate is rotated and
+    counter rotates it to straighen up
+
+    Parameters
+    ------
+    img : ndarray
+        2D array containing the original image
+
+    Return
+    ------
+    rotated_img : ndarray
+        2D array containing the rotated image
+    """
+    angle = detect_plate_rotation(img)
+    rotated_img = ndi.rotate(img, angle, mode='reflect')
+
+    return rotated_img
+
+def detect_plate_rotation(img):
+    """
+    Takes the original image, use a probabilistic hough line transform to
+    identify straight lines around the plate. Determines the median angle in order to
+    straighten them up
+
+    Parameters
+    ------
+    img : ndarray
+        2D array containing the original image
+
+    Returns
+    ------
+    angle : float
+        The angle at which the plate needs to be counter rotated
+    """
+
+    # First we need may need to the image to ~400x400 pixels in order to speed up the probabilistic hough transform
+    resized_img = resize_image(img)
+    # perform sobel filter and threshold to detect ridges
+    edges = skfilt.sobel(resized_img)
+    ridges = edges > skfilt.threshold_otsu(edges)
+    # perform probab hough transform to identify the lines
+    tested_angles = np.linspace(-np.pi / 2, np.pi / 2, 360)
+    line_length = int(resized_img.shape[0] / 2)
+    lines = probabilistic_hough_line(ridges, threshold=int(line_length/2), line_length=line_length,
+                    line_gap=int(line_length/40), theta=tested_angles)
+
+    # lets loop through the results
+    angles = []
+    for line in lines:
+        # first get x and y points and determine the angle
+        p0, p1 = line
+        x_vals = [p0[0], p1[0]]
+        y_vals = [p0[1], p1[1]]
+        angle = math.degrees(math.atan2(y_vals[0] - y_vals[1], x_vals[0] - x_vals[1]))
+        # some angles may be ~90, ~180 or ~270, so we need to adjust them so all of them
+        # are ~0
+        angle = adjust_angle(angle)
+        if angle is not False:
+            # Keep all the correct angles
+            angles.append(angle)
+    # rotate the image by the median angle
+    angle = np.median(np.array(angles))
+
+    return angle
+
+def resize_image(img):
+    """
+    Adjusts the size of the image so either x or y is approximately 300-500 pixels
+
+    Parameters
+    ------
+    img : ndarray
+        2D array containing the original image
+
+    Returns
+    ------
+    resized_img : ndarray
+        Adjusted 2d Array
+    factor : int
+        The scale factor used to adjust the image
+    """
+    for i in range(1, 6):
+        new_y = int(img.shape[0] / i)
+        new_x = int(img.shape[1] / i)
+        if ((300 <= new_y <= 500)) or ((300 <= new_x <= 500)):
+            resized_img = resize(img, (new_y, new_x))
+            return resized_img
+    return img
+
+def adjust_angle(angle):
+    """
+    Takes an angle and continuously removes 90 degrees until it falls with in a given range
+
+    Parameters
+    ------
+    angle : int
+        The angle to adjust
+
+    Returns
+    ------
+    angle : int (or False)
+        The adjusted angle, if the new angle can't be adjusted to within the specified range,
+        returns False
+    """
+    # iterate through and take off 90 degrees each time
+    for i in range(5):
+        # not on the first loop
+        if i > 0:
+            angle -= 90
+        # if we get it between -5 and -5 return the adjusted angle
+        if (-5 < angle) and (angle < 5):
+            return angle
+        # if its less than -5 then its probably an incorrect line so return False
+        elif angle < -5:
+            return False
 
 def detect_plate(img, plate_type=None):
     """
@@ -37,10 +160,18 @@ def detect_plate(img, plate_type=None):
     # Generate plate
     currentplate = Plate(plate_type = plate_type)
 
+    """
+    edges = skfilt.sobel(img)
+    ridges = edges > skfilt.threshold_otsu(edges)
+    plt.figure()
+    plt.imshow(ridges)
+    plt.show()
+    """
+
     if "hex" in plate_type:
         # Because the Hexagonal plates are staggered and not straight ridges between wells, the
         # start/end of the plates are really clear - lets try and detect them directly
-        start_x, end_x, start_y, end_y = get_corners_from_edges(img)
+        start_x, end_x, start_y, end_y = get_corners_from_edges(img) 
     else:
         start_x, start_y, x_gap, y_gap = get_first_well_and_gaps(img, currentplate._no_rows, currentplate._no_columns, plate_type=plate_type)
         start_x, end_x, start_y, end_y = currentplate.get_plate_corners(start_x, start_y, x_gap, y_gap)

@@ -31,6 +31,7 @@ def detect_galleria(img, labelled_wells):
         Array where each label represents a detected galleria with the label the same as
         the well number. The rest of the array, including the wells, are 0.
     """
+
     well_dict = {}
     for region in regionprops(labelled_wells, intensity_image=img):
         well_dict[region.label] = detect_galleria_in_well(region.intensity_image)
@@ -111,6 +112,8 @@ def detect_galleria_in_well(well):
     # Create a well with only the galleria labelled
     result = np.zeros(well.shape)
     result[labelled_gall == max_area_lab] = 1
+
+
     """
     fig = plt.figure()
     #plt.gray()  # show the filtered result in grayscale

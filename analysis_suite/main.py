@@ -59,8 +59,8 @@ def run_analysis(filename, plate_type, out_folder=None):
         A list of filenames to analyse
     """
     ### TODO: need to review if we want input as list or individual string
-    from timeit import default_timer as timer
-    start = timer()
+    #from timeit import default_timer as timer
+    #start = timer()
     # TODO: review this as only temporary solution
     if isinstance(filename, list):
         fluo_image_file = filename[1]
@@ -71,6 +71,7 @@ def run_analysis(filename, plate_type, out_folder=None):
 
     # Load the first image as a numpy array
     img = load.load_image(bf_image_file)
+    img = plate_detection.straighten_plate(img)
     out_file = load.get_out_file(bf_image_file)
     # Run plate detection
     labelled_wells, labelled_plate = plate_detection.detect_plate(img, plate_type=plate_type)
@@ -84,6 +85,6 @@ def run_analysis(filename, plate_type, out_folder=None):
         bio_dict = meas.extract_biolum_values(labelled_wells, fluo_image)
         output.save_img(out_folder, out_file, img, labelled_plate, labelled_wells, labelled_gall)
         output.save_dict(out_folder, out_file, bio_dict)
-        end = timer()
-        print(end-start, flush=True)
+        #end = timer()
+        #print(end-start, flush=True)
         return bio_dict

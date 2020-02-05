@@ -32,9 +32,12 @@ def save_img(folder, filename, img, labelled_plate, labelled_wells, labelled_gal
         ndi labelled image from skimage.ndimage - where each well has a unique number starting from 1
     """
     # create plot and show original image
+    iter = int(5 * (img.shape[0]/2000))
+    if iter == 0:
+        iter = 1
     filename = filename + ".jpg"
     contours = labelled_wells * ~ndi.binary_erosion(
-            labelled_wells > 0, iterations = 5)
+            labelled_wells > 0, iterations = iter)
     img = img.astype(float)
     img -= img.min()
     img /= img.max()
@@ -43,12 +46,12 @@ def save_img(folder, filename, img, labelled_plate, labelled_wells, labelled_gal
     # imgout[contours > 0] = labs[contours > 0]
     img = (255 * gray2rgb(img)).astype('uint8')
     img[contours > 0] = (255, 255, 0)
-    font = ImageFont.truetype("DejaVuSans.ttf", 28)
+    font = ImageFont.truetype("DejaVuSans.ttf", int(56 * (img.shape[0]/2000)))
     pilim = Image.fromarray(img)
     pildraw = ImageDraw.ImageDraw(pilim)
     for lab in range(1, contours.max() + 1):
         coord = (contours == lab).nonzero()
-        coord = [dim.min() for dim in coord]
+        coord = [coord[0].min(), coord[1].max()]
         text = f"{lab}"
         txtsize = font.getsize(text)
         pildraw.text(
