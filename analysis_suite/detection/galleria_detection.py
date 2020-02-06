@@ -7,7 +7,7 @@ Contains the main functions for detecting galleria
 import matplotlib.pyplot as plt
 from skimage.measure import regionprops
 import numpy as np
-from skimage.filters import sobel, threshold_yen
+from skimage.filters import sobel, threshold_yen, gaussian
 import scipy.ndimage as ndi
 from scipy.stats import ttest_ind
 
@@ -70,6 +70,31 @@ def map_galleria(labelled_wells, galleria_dict):
 
     return labelled_gall
 
+def detect_galleria_in_cropped_well(well):
+    sobel_img = sobel(well)
+    blurred = gaussian(sobel_img, sigma=2.0)
+    thresh = threshold_yen(well)
+    dark_spots = np.array((well < thresh).nonzero()).T
+
+    bool_mask = np.zeros(well.shape, dtype=np.bool)
+    #bool_mask[tuple(light_spots.T)] = True
+    bool_mask[tuple(dark_spots.T)] = True
+    seed_mask, num_seeds = ndi.label(bool_mask)
+
+    from skimage import morphology
+    ws = morphology.watershed(blurred, seed_mask)
+
+    fig, axes = plt.subplots(1, 5, figsize=(15, 5), sharex=True, sharey=True)
+    ax = axes.ravel()
+    ax[0].imshow(well)
+    ax[1].imshow(well)
+    ax[1].plot(dark_spots[:, 1], dark_spots[:, 0], 'o')
+    ax[2].imshow(sobel_img)
+    ax[3].imshow(blurred)
+    ax[4].imshow(ws)
+    plt.show()
+
+
 def detect_galleria_in_well(well):
     """
     Function for detecting galleria within a well
@@ -90,6 +115,9 @@ def detect_galleria_in_well(well):
     well_cropped = well[top:(well.shape[0]-bottom),left:(well.shape[1]-right)]
     # TODO: may want to remove this next median filter step and instead have a filtering
     # based on distance transform later on - this reduce the detected single pixel lines
+
+    detect_galleria_in_cropped_well(well_cropped)
+
     well_cropped = ndi.median_filter(well_cropped, size=5)
     # Threshold the image
     thresh = threshold_yen(well_cropped)
@@ -113,17 +141,14 @@ def detect_galleria_in_well(well):
     result = np.zeros(well.shape)
     result[labelled_gall == max_area_lab] = 1
 
-
     """
-    fig = plt.figure()
-    #plt.gray()  # show the filtered result in grayscale
-    ax1 = fig.add_subplot(131)  # left side
-    ax2 = fig.add_subplot(132)  # centre
-    ax3 = fig.add_subplot(133)  # right side
-    ax1.imshow(well)
-    ax2.imshow(gall)
-    ax3.imshow(result)
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5), sharex=True, sharey=True)
+    ax = axes.ravel()
+    ax[0].imshow(well_cropped)
+    ax[1].imshow(labelled_gall)
+    ax[2].imshow(result)
     plt.show()
+
     """
     return result
 
@@ -149,7 +174,7 @@ def find_edges_to_crop(well):
         The number of columns from the right that need cropping
     """
     # loop through top 3 rows
-    for top in range(1, 4):
+    for top in range(1, int(well.shape[0]/10)):
         # get row (need -1 as first row)
         rows_top = well[top-1].flatten()
         # compare the arrays and determine if row should be removed
@@ -159,19 +184,19 @@ def find_edges_to_crop(well):
             top -= 1
             break
     # repeat for left column, bottom rows and right column, respectively.
-    for left in range(1, 4):
+    for left in range(1, int(well.shape[1]/20)):
         cols_left = well[:, (left-1)].flatten()
         remove = compare_arrays(well.flatten(), cols_left)
         if remove is False:
             left -= 1
             break
-    for bottom in range(1, 4):
+    for bottom in range(1, int(well.shape[0]/10)):
         rows_bottom = well[-(bottom)].flatten()
         remove = compare_arrays(well.flatten(), rows_bottom)
         if remove is False:
             bottom -= 1
             break
-    for right in range(1, 4):
+    for right in range(1, int(well.shape[1]/20)):
         cols_right = well[:, -(right)].flatten()
         remove = compare_arrays(well.flatten(), cols_right)
         if remove is False:
