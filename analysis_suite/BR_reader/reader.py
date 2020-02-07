@@ -205,7 +205,7 @@ class Reader():
             self.img_size_x = self._first_region(scn_metadata, 'nxpix')
             self.img_size_y = self._first_region(scn_metadata, 'nypix')
         except:
-            # added this in as the summary was giving the correct pixels when 
+            # added this in as the summary was giving the correct pixels when
             # the above was giving an error
             summary = self.get_img_summary()
             pixels = summary["Number Of Pixels"].strip("( )").split(" x ")

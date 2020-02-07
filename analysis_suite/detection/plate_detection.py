@@ -57,6 +57,8 @@ def detect_plate_rotation(img):
         The angle at which the plate needs to be counter rotated
     """
 
+    ## TODO: try loop - or try detecting whole plate
+
     # First we need may need to the image to ~400x400 pixels in order to speed up the probabilistic hough transform
     resized_img = resize_image(img)
     # perform sobel filter and threshold to detect ridges
@@ -86,7 +88,7 @@ def detect_plate_rotation(img):
         return 0 # # TODO: need to check why its 0 and improve above algorithm
     # rotate the image by the median angle
     angle = np.median(np.array(angles))
-
+    
     return angle
 
 def resize_image(img):

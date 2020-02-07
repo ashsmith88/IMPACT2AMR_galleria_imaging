@@ -70,7 +70,54 @@ def map_galleria(labelled_wells, galleria_dict):
 
     return labelled_gall
 
-def detect_galleria_in_cropped_well(well):
+def detect_galleria_in_cropped_well(image):
+    from skimage.filters import threshold_otsu, threshold_li, threshold_yen
+
+    thresh = np.percentile(image, 25)
+    binary = image > thresh
+    edited = np.copy(image)
+    mask = np.random.randint(low=np.percentile(image, 25), high=np.median(image), size=image.shape)
+    mask = np.zeros((image.shape))
+    edited[image < thresh] = mask[image < thresh]
+
+    sobel_img = sobel(edited)
+    blurred = gaussian(sobel_img, sigma=2.0)
+
+    fig, axes = plt.subplots(ncols=6, figsize=(8, 2.5))
+    ax = axes.ravel()
+    ax[0] = plt.subplot(1, 6, 1)
+    ax[1] = plt.subplot(1, 6, 2)
+    ax[2] = plt.subplot(1, 6, 3, sharex=ax[0], sharey=ax[0])
+    ax[3] = plt.subplot(1, 6, 4)
+    ax[4] = plt.subplot(1, 6, 5)
+    ax[5] = plt.subplot(1, 6, 6)
+
+    ax[0].imshow(image, cmap=plt.cm.gray)
+    ax[0].set_title('Original')
+    ax[0].axis('off')
+
+    ax[1].hist(image.ravel(), bins=256)
+    ax[1].set_title('Histogram')
+    ax[1].axvline(thresh, color='r')
+
+    ax[2].imshow(binary, cmap=plt.cm.gray)
+    ax[2].set_title('Thresholded')
+    ax[2].axis('off')
+
+    ax[3].imshow(edited)
+    ax[3].set_title("Edited")
+    ax[3].axis('off')
+
+    ax[4].imshow(sobel_img)
+    ax[4].set_title("Sobel")
+    ax[4].axis('off')
+
+    ax[5].imshow(blurred)
+    ax[5].set_title("Blurred")
+    ax[5].axis('off')
+
+    plt.show()
+    """
     sobel_img = sobel(well)
     blurred = gaussian(sobel_img, sigma=2.0)
     thresh = threshold_yen(well)
@@ -83,7 +130,8 @@ def detect_galleria_in_cropped_well(well):
 
     from skimage import morphology
     ws = morphology.watershed(blurred, seed_mask)
-
+    """
+    """
     fig, axes = plt.subplots(1, 5, figsize=(15, 5), sharex=True, sharey=True)
     ax = axes.ravel()
     ax[0].imshow(well)
@@ -93,7 +141,7 @@ def detect_galleria_in_cropped_well(well):
     ax[3].imshow(blurred)
     ax[4].imshow(ws)
     plt.show()
-
+    """
 
 def detect_galleria_in_well(well):
     """
