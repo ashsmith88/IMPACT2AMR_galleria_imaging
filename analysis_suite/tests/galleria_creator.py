@@ -53,6 +53,10 @@ def well_with_galleria(well, galleria_pixel = 5000, return_label=False):
         except:
             pass
 
+    plt.figure()
+    plt.imshow(well_mask)
+    plt.show()
+
     # Use canny edge filter to create a boolean mask, dilate this to create one whole area
     # then fill this area to create the mask
     edges = feature.canny(well_mask)

@@ -10,6 +10,7 @@ import numpy as np
 from skimage.filters import sobel, threshold_yen, gaussian
 import scipy.ndimage as ndi
 from scipy.stats import ttest_ind
+from skimage.segmentation import active_contour
 
 def detect_galleria(img, labelled_wells):
     """
@@ -32,12 +33,31 @@ def detect_galleria(img, labelled_wells):
         the well number. The rest of the array, including the wells, are 0.
     """
 
+
     well_dict = {}
     for region in regionprops(labelled_wells, intensity_image=img):
         well_dict[region.label] = detect_galleria_in_well(region.intensity_image)
     labelled_gall = map_galleria(labelled_wells, well_dict)
 
     return well_dict, labelled_gall
+
+def get_well_average_by_column(labelled_wells):
+    """
+    columns = {1: [1, 6, 11, 16, 21, 26, 31, 36, 41, 46],
+                2: [2, 7, 12, 17, 22, 27, 32, 37, 42, 47],
+                3: [3, 8, 13, 18, 23, 28, 33, 38, 43, 48],
+                4: [4, 9, 14, 19, 24, 29, 34, 39, 44, 49],
+                5: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]}
+
+    wells = {}
+    for col, well_nums in columns.items():
+        wells[col] = []
+        for region in regionprops(labelled_wells, intensity_image=img):
+            if region.label in well_nums:
+                wells[col].append(region.intensity_image)
+        wells[col] = np.average(wells[col], axis=0)
+    """
+
 
 def map_galleria(labelled_wells, galleria_dict):
     """
@@ -72,6 +92,10 @@ def map_galleria(labelled_wells, galleria_dict):
 
 def detect_galleria_in_cropped_well(image):
     from skimage.filters import threshold_otsu, threshold_li, threshold_yen
+
+    # Idea - compare background for all images in the same column and use that to work out difference
+    # first loop through the columns and get average well
+    # pass this in to this function along with the well being analysed
 
     thresh = np.percentile(image, 25)
     binary = image > thresh
@@ -117,6 +141,27 @@ def detect_galleria_in_cropped_well(image):
     ax[5].axis('off')
 
     plt.show()
+
+    """
+    ### Active contour approach
+    s = np.linspace(0, 2*np.pi, 400)
+    r = int(image.shape[0]/2) + int(image.shape[0]/2)*np.sin(s)
+    c = int(image.shape[1]/2) + int(image.shape[1]/2)*np.cos(s)
+    init = np.array([r, c]).T
+
+    snake = active_contour(gaussian(image, 3),
+                           init, alpha=0.015, beta=1, gamma=0.001,
+                           coordinates='rc')
+
+    fig, ax = plt.subplots(figsize=(7, 7))
+    ax.imshow(image, cmap=plt.cm.gray)
+    ax.plot(init[:, 1], init[:, 0], '--r', lw=3)
+    ax.plot(snake[:, 1], snake[:, 0], '-b', lw=3)
+    ax.set_xticks([]), ax.set_yticks([])
+    ax.axis([0, image.shape[1], image.shape[0], 0])
+    plt.show()
+    """
+
     """
     sobel_img = sobel(well)
     blurred = gaussian(sobel_img, sigma=2.0)
