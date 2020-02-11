@@ -14,7 +14,8 @@ from scipy.special import binom
 import matplotlib.pyplot as plt
 import numpy as np
 
-def well_with_galleria(well, galleria_pixel = 5000, return_label=False):
+def well_with_galleria(well, galleria_pixel = 5000, return_label=False, return_contour_coords=False,
+                rad = 0.2, edgy = 0.05, num_points = 3):
     """
     Generates fake galleria inside a well
 
@@ -31,7 +32,9 @@ def well_with_galleria(well, galleria_pixel = 5000, return_label=False):
 
     # Create a well mask and generate contours for the galleria outline
     well_mask = np.zeros((well_height, well_width))
-    x, y = create_galleria(rad = 0.95, edgy = 0.5, num_points = 2)
+    x, y = create_galleria(rad = rad, edgy = edgy, num_points = num_points)
+    if return_contour_coords:
+        return np.array([x, y]).T
 
     # Need to convert the coordinates to the correct range as currently between 0 and 1
     for x_coord, y_coord in zip(x, y):
@@ -52,10 +55,6 @@ def well_with_galleria(well, galleria_pixel = 5000, return_label=False):
             well_mask[new_y, new_x] = 1
         except:
             pass
-
-    plt.figure()
-    plt.imshow(well_mask)
-    plt.show()
 
     # Use canny edge filter to create a boolean mask, dilate this to create one whole area
     # then fill this area to create the mask
@@ -102,7 +101,7 @@ def create_galleria(rad = 0.2, edgy = 0.05, num_points = 3):
     a = get_random_points(n=num_points, scale=1)
 
     # Generate the curve lines between them
-    x,y, _ = get_bezier_curve(a,rad=rad, edgy=edgy)
+    x,y, _ = get_bezier_curve(a, rad=rad, edgy=edgy)
 
     return x, y
 

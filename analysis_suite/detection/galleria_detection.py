@@ -90,103 +90,50 @@ def map_galleria(labelled_wells, galleria_dict):
 
     return labelled_gall
 
+def test_gmmreg(
+        scene,
+        edges,
+        level=4,
+        scales=[.3, .2, .1, .05],
+        lambdas=[.1, .02, .01, .02, 0, 0, 0],
+        iters=[100, 200, 300, 400],
+        normalize_flag=1,
+        ):
+    from gmmreg._core import normalize, denormalize, run_multi_level
+    from analysis_suite.tests.galleria_creator import well_with_galleria
+    model = well_with_galleria(scene, return_contour_coords=True)
+    scene = np.argwhere(edges==1)
+
+    try:
+        ctrl_pts_file = c.get(section_common, 'ctrl_pts')
+        ctrl_pts = np.loadtxt(ctrl_pts_file)
+    except:
+        ctrl_pts =  model
+    if normalize_flag==1:
+        [model, c_m, s_m] = normalize(model)
+        [scene, c_s, s_s] = normalize(scene)
+        [ctrl_pts, c_c, s_c] = normalize(ctrl_pts)
+    import time
+    t1 = time.time()
+    print("running run_multi_level", flush=True)
+    after_tps = run_multi_level(model,scene,ctrl_pts,level,scales,lambdas,iters)
+    print("Done", flush=True)
+    if normalize_flag==1:
+        model = denormalize(model,c_m,s_m)
+        scene = denormalize(scene,c_s,s_s)
+        after_tps = denormalize(after_tps,c_s,s_s)
+    from analysis_suite import plotting
+    t2 = time.time()
+    print("Elasped time: {} seconds".format(t2-t1))
+    plotting.displayABC(model, scene, after_tps)
+
+    return model, scene, after_tps
+
+
 def detect_galleria_in_cropped_well(image):
-    from skimage.filters import threshold_otsu, threshold_li, threshold_yen
 
-    # Idea - compare background for all images in the same column and use that to work out difference
-    # first loop through the columns and get average well
-    # pass this in to this function along with the well being analysed
+    return
 
-    thresh = np.percentile(image, 25)
-    binary = image > thresh
-    edited = np.copy(image)
-    mask = np.random.randint(low=np.percentile(image, 25), high=np.median(image), size=image.shape)
-    mask = np.zeros((image.shape))
-    edited[image < thresh] = mask[image < thresh]
-
-    sobel_img = sobel(edited)
-    blurred = gaussian(sobel_img, sigma=2.0)
-
-    fig, axes = plt.subplots(ncols=6, figsize=(8, 2.5))
-    ax = axes.ravel()
-    ax[0] = plt.subplot(1, 6, 1)
-    ax[1] = plt.subplot(1, 6, 2)
-    ax[2] = plt.subplot(1, 6, 3, sharex=ax[0], sharey=ax[0])
-    ax[3] = plt.subplot(1, 6, 4)
-    ax[4] = plt.subplot(1, 6, 5)
-    ax[5] = plt.subplot(1, 6, 6)
-
-    ax[0].imshow(image, cmap=plt.cm.gray)
-    ax[0].set_title('Original')
-    ax[0].axis('off')
-
-    ax[1].hist(image.ravel(), bins=256)
-    ax[1].set_title('Histogram')
-    ax[1].axvline(thresh, color='r')
-
-    ax[2].imshow(binary, cmap=plt.cm.gray)
-    ax[2].set_title('Thresholded')
-    ax[2].axis('off')
-
-    ax[3].imshow(edited)
-    ax[3].set_title("Edited")
-    ax[3].axis('off')
-
-    ax[4].imshow(sobel_img)
-    ax[4].set_title("Sobel")
-    ax[4].axis('off')
-
-    ax[5].imshow(blurred)
-    ax[5].set_title("Blurred")
-    ax[5].axis('off')
-
-    plt.show()
-
-    """
-    ### Active contour approach
-    s = np.linspace(0, 2*np.pi, 400)
-    r = int(image.shape[0]/2) + int(image.shape[0]/2)*np.sin(s)
-    c = int(image.shape[1]/2) + int(image.shape[1]/2)*np.cos(s)
-    init = np.array([r, c]).T
-
-    snake = active_contour(gaussian(image, 3),
-                           init, alpha=0.015, beta=1, gamma=0.001,
-                           coordinates='rc')
-
-    fig, ax = plt.subplots(figsize=(7, 7))
-    ax.imshow(image, cmap=plt.cm.gray)
-    ax.plot(init[:, 1], init[:, 0], '--r', lw=3)
-    ax.plot(snake[:, 1], snake[:, 0], '-b', lw=3)
-    ax.set_xticks([]), ax.set_yticks([])
-    ax.axis([0, image.shape[1], image.shape[0], 0])
-    plt.show()
-    """
-
-    """
-    sobel_img = sobel(well)
-    blurred = gaussian(sobel_img, sigma=2.0)
-    thresh = threshold_yen(well)
-    dark_spots = np.array((well < thresh).nonzero()).T
-
-    bool_mask = np.zeros(well.shape, dtype=np.bool)
-    #bool_mask[tuple(light_spots.T)] = True
-    bool_mask[tuple(dark_spots.T)] = True
-    seed_mask, num_seeds = ndi.label(bool_mask)
-
-    from skimage import morphology
-    ws = morphology.watershed(blurred, seed_mask)
-    """
-    """
-    fig, axes = plt.subplots(1, 5, figsize=(15, 5), sharex=True, sharey=True)
-    ax = axes.ravel()
-    ax[0].imshow(well)
-    ax[1].imshow(well)
-    ax[1].plot(dark_spots[:, 1], dark_spots[:, 0], 'o')
-    ax[2].imshow(sobel_img)
-    ax[3].imshow(blurred)
-    ax[4].imshow(ws)
-    plt.show()
-    """
 
 def detect_galleria_in_well(well):
     """
