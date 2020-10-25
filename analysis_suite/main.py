@@ -54,13 +54,16 @@ def run_batch(folder, plate_type):
         WellData.create_dataframes()
         for meas, df in WellData.dataframes.items():
             WellData.dataframes[meas] = df.to_json()
-        with open('measurements.json', 'w') as outfile:
-            json.dump(WellData.dataframes, outfile)
-        print(WellData.dataframes)
+        measurements_json = json.dumps(WellData.dataframes)
+        images_json = json.dumps(result_images, cls=edit.NumpyArrayEncoder)
         ### # TODO: Need a save dataframe option
 
-        with open('images.json', 'w') as outfile:
-            json.dump(result_images, outfile, cls=edit.NumpyArrayEncoder)
+
+        #with open('measurements.json', 'w') as outfile:
+            #json.dump(WellData.dataframes, outfile)
+        #with open('images.json', 'w') as outfile:
+        #    json.dump(result_images, outfile, cls=edit.NumpyArrayEncoder)
+
     else:
         ### TODO: Need to make proper error logs
         print("not a folder!")
@@ -97,12 +100,12 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
 
     """
     Temporary for development of model
-    """
+
     wells = galleria_detection.get_wells(img, labelled_wells)
     all_wells = run_model2(wells, zoom_factor=3.2)
     labelled_gall = galleria_detection.map_galleria(labelled_wells, all_wells)
     #return
-    """
+
     End of temporary
     """
 
@@ -116,15 +119,15 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
         # extract well data from fluo image
         ## TODO: need to extract this on galleria only?
         #bio_dict = meas.extract_biolum_values(labelled_wells, fluo_image)
-        bio_dict = meas.extract_biolum_values(labelled_gall, fluo_image)
-        melanisation_dict = meas.extract_melanisation_values(labelled_gall, img)
+        bio_dict = meas.extract_biolum_values(labelled_wells, fluo_image)
+        melanisation_dict = meas.extract_melanisation_values(labelled_wells, img)
 
         #return bio_dict
-        output.save_img(out_folder, out_file, img, labelled_plate, labelled_wells, labelled_gall)
+        output.save_img(out_folder, out_file, img, labelled_plate, labelled_wells, None)
         output.save_dict(out_folder, out_file, bio_dict)
         #output.save_dict(out_folder, out_file, melanisation_dict, mel=True)
 
-        result_img = np.stack([img, labelled_wells, labelled_gall])
+        #result_img = np.stack([img, labelled_wells, labelled_gall])
         #end = timer()
         #print(end-start, flush=True)
-        return bio_dict, melanisation_dict, result_img
+        return bio_dict, melanisation_dict, None #, result_img

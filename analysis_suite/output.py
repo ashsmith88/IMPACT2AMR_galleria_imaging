@@ -46,6 +46,10 @@ def save_img(folder, filename, img, labelled_plate, labelled_wells, labelled_gal
     # imgout[contours > 0] = labs[contours > 0]
     img = (255 * gray2rgb(img)).astype('uint8')
     img[contours > 0] = (255, 255, 0)
+    if labelled_gall is None:
+        pilim = Image.fromarray(img)
+        pilim.save(os.path.join(folder, filename))
+        return
     font = ImageFont.truetype("DejaVuSans.ttf", int(56 * (img.shape[0]/2000)))
     contours_gall = labelled_gall * ~ndi.binary_erosion(
             labelled_gall > 0, iterations = iter)
