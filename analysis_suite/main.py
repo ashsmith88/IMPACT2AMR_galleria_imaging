@@ -19,7 +19,7 @@ from analysis_suite.run_yapic_model import run_model2
 import analysis_suite.tests.plate_creator as plate_creat
 import analysis_suite.output as output
 from analysis_suite.well_class import AllWells
-import json
+
 
 def run_batch(folder, plate_type):
     """
@@ -52,17 +52,7 @@ def run_batch(folder, plate_type):
         # create dictionary of "plottable" dataframes where key is the info (i.e. measurement type)
         # and value is the dataframe
         WellData.create_dataframes()
-        for meas, df in WellData.dataframes.items():
-            WellData.dataframes[meas] = df.to_json()
-        measurements_json = json.dumps(WellData.dataframes)
-        images_json = json.dumps(result_images)
-        ### # TODO: Need a save dataframe option
-
-
-        #with open('measurements.json', 'w') as outfile:
-            #json.dump(WellData.dataframes, outfile)
-        #with open('images.json', 'w') as outfile:
-        #    json.dump(result_images, outfile, cls=edit.NumpyArrayEncoder)
+        measurements_json, image_json = outp.create_json_objects()
 
     else:
         ### TODO: Need to make proper error logs

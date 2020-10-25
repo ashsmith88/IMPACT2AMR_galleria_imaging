@@ -30,9 +30,14 @@ def normalise_background_fluo(labelled_plate, fluo_image):
     normalised = (fluo_image / medians[:,None]) * np.median(outside_plate)
     return normalised
 
-
 class NumpyArrayEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
+        return JSONEncoder.default(self, obj)
+
+class JSONEncoder(JSONEncoder):
+    def default(self, obj):
+        if hasattr(obj, 'to_json'):
+            return obj.to_json(orient='records')
         return JSONEncoder.default(self, obj)
