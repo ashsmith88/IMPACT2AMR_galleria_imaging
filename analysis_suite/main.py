@@ -100,12 +100,12 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
 
     """
     Temporary for development of model
-
+    """
     wells = galleria_detection.get_wells(img, labelled_wells)
     all_wells = run_model2(wells, zoom_factor=3.2)
     labelled_gall = galleria_detection.map_galleria(labelled_wells, all_wells)
     #return
-
+    """
     End of temporary
     """
 
@@ -119,15 +119,15 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
         # extract well data from fluo image
         ## TODO: need to extract this on galleria only?
         #bio_dict = meas.extract_biolum_values(labelled_wells, fluo_image)
-        bio_dict = meas.extract_biolum_values(labelled_wells, fluo_image)
-        melanisation_dict = meas.extract_melanisation_values(labelled_wells, img)
+        bio_dict = meas.extract_biolum_values(labelled_gall, fluo_image)
+        melanisation_dict = meas.extract_melanisation_values(labelled_gall, img)
 
         #return bio_dict
-        output.save_img(out_folder, out_file, img, labelled_plate, labelled_wells, None)
+        output.save_img(out_folder, out_file, img, labelled_plate, labelled_wells, labelled_gall)
         output.save_dict(out_folder, out_file, bio_dict)
         #output.save_dict(out_folder, out_file, melanisation_dict, mel=True)
 
-        #result_img = np.stack([img, labelled_wells, labelled_gall])
+        result_img = np.stack([img, labelled_wells, labelled_gall])
         #end = timer()
         #print(end-start, flush=True)
-        return bio_dict, melanisation_dict, None #, result_img
+        return bio_dict, melanisation_dict, result_img
