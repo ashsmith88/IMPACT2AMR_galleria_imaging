@@ -23,3 +23,5 @@ lib/
 .eggs/
 .mypy_cache/
 *model.h5
+*.json
+*blah.h5

@@ -29,8 +29,20 @@ def extract_biolum_values(labelled_wells, fluo_image):
     bioluminescence_dict = {}
 
     for region in regionprops(labelled_wells):
-        # get mean fluo from the well area in matching fluo image
+        # get mean fluo from the galleria area in matching fluo image
         fluo = np.mean(fluo_image[tuple(np.array(region.coords).T)])
         bioluminescence_dict[region.label] = [region.area, fluo, fluo*region.area]
 
     return bioluminescence_dict
+
+def extract_melanisation_values(labelled_gall, image):
+    image = np.array(image)
+
+    melanisation_dict = {}
+
+    for region in regionprops(labelled_gall):
+        # get median pixel value from the galleria in the image
+        mel = np.median(image[tuple(np.array(region.coords).T)])
+        melanisation_dict[region.label] = [region.area, mel, mel*region.area]
+
+    return melanisation_dict

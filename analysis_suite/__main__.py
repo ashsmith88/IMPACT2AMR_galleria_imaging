@@ -22,7 +22,6 @@ PARSER.add_argument("-batch", action="store_true",
                     )
 ARGS = PARSER.parse_args()
 
-
 if ARGS.batch:
     run_batch(
         ARGS.filename,

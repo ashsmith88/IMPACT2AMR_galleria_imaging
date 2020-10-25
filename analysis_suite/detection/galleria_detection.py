@@ -11,6 +11,29 @@ from skimage.filters import sobel, threshold_yen, gaussian
 import scipy.ndimage as ndi
 from scipy.stats import ttest_ind
 from skimage.segmentation import active_contour
+from skimage.external import tifffile
+import os
+import skimage.io as skio
+import skimage
+
+def get_wells(img, labelled_wells):
+    wells = []
+    for region in regionprops(labelled_wells, intensity_image=img):
+        wells.append(region.intensity_image)
+    return wells
+
+
+
+def save_wells_for_training(img, labelled_wells, tpoint, filename):
+        ## this is simply for saving images to make labels for training
+    for region in regionprops(labelled_wells, intensity_image=img):
+        path = os.path.dirname(filename)
+        date = os.path.basename(path)
+        results_folder =  os.path.join(path, "well_results")
+        if not os.path.isdir(results_folder):
+            os.mkdir(results_folder)
+        tifffile.imsave(os.path.join(results_folder, "%s_T%s_well_%s_image.tif"%(date, tpoint, region.label)), region.intensity_image)
+        #skio.imsave(os.path.join(results_folder, "%s_T%s_well_%s_image.png"%(date, tpoint, region.label)), skimage.color.grey2rgb(region.intensity_image))
 
 def detect_galleria(img, labelled_wells):
     """
@@ -82,13 +105,13 @@ def map_galleria(labelled_wells, galleria_dict):
 
     for region in regionprops(labelled_wells):
         # get the well
-        gall_in_well = galleria_dict[region.label]
+        #gall_in_well = galleria_dict[region.label]
+        gall_in_well = galleria_dict._individual_wells[region.label].output_array
         # change the label
         gall_in_well[gall_in_well == 1] = region.label
         # label the galleria in the correct location on the whole image
         labelled_gall[region.bbox[0]:region.bbox[2], region.bbox[1]:region.bbox[3]] = gall_in_well
-
-    return labelled_gall
+    return labelled_gall.astype(int)
 
 def test_gmmreg(
         scene,

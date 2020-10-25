@@ -47,6 +47,9 @@ def save_img(folder, filename, img, labelled_plate, labelled_wells, labelled_gal
     img = (255 * gray2rgb(img)).astype('uint8')
     img[contours > 0] = (255, 255, 0)
     font = ImageFont.truetype("DejaVuSans.ttf", int(56 * (img.shape[0]/2000)))
+    contours_gall = labelled_gall * ~ndi.binary_erosion(
+            labelled_gall > 0, iterations = iter)
+    img[contours_gall > 0] = (255, 255, 0)
     pilim = Image.fromarray(img)
     pildraw = ImageDraw.ImageDraw(pilim)
     for lab in range(1, contours.max() + 1):
@@ -61,39 +64,9 @@ def save_img(folder, filename, img, labelled_plate, labelled_wells, labelled_gal
             font=font)
     # skio.imsave(os.path.join(folder, filename), (255*imgout).astype('uint8'))
     pilim.save(os.path.join(folder, filename))
-    """
-    for well_lab in range(1, labelled_wells.max() + 1):
-        # create colour for contour
-        col = plt.cm.gist_rainbow((well_lab / 9.1) % 1)
-        # plot contour
-        plt.contour(labelled_wells == well_lab, levels=[0.5], colors=[col])
-        # get the location of the well and find the top right corner in order to add the text label
-        bw0 = labelled_wells == well_lab
-        pos0 = bw0.nonzero()
-        pos = (np.min(pos0[0]), np.max(pos0[1]))
-        plt.text(pos[1], pos[0], str(well_lab), color=col)
 
-    for gall_lab in range(1, int(labelled_gall.max()) + 1):
-        # create colour for contour
-        col = plt.cm.gist_rainbow((gall_lab / 9.1) % 1)
-        # plot contour
-        plt.contour(labelled_gall == gall_lab, levels=[0.5], colors=[col])
-        # get the location of the well and find the top right corner in order to add the text label
-        bw0 = labelled_gall == gall_lab
-        pos0 = bw0.nonzero()
-        pos = (np.min(pos0[0]), np.max(pos0[1]))
-        plt.text(pos[1], pos[0], str(gall_lab), color=col)
 
-    # set the colour to one above the maximum number of the wells and use
-    # it to plot the contour of the plate outline
-    col = plt.cm.gist_rainbow(((labelled_wells.max()+1) / 9.1) % 1)
-    plt.contour(labelled_plate == 1, levels=[0.5], colors=[col])
-    #plt.show()
-    plt.savefig(os.path.join(folder, filename))
-    plt.close()
-    """
-
-def save_dict(folder, filename, dictionary):
+def save_dict(folder, filename, dictionary, mel=False):
     """
     Saves a dictionary as a csv
 
@@ -112,4 +85,7 @@ def save_dict(folder, filename, dictionary):
 
     # convert to pandas dataframe and save
     data = pd.DataFrame.from_dict(dictionary, orient='index', columns=['Area', 'Mean Fluo', 'Total fluo'])
-    data.to_csv(os.path.join(folder, "%s.csv"%(filename)))
+    if mel==True:
+        data.to_csv(os.path.join(folder, "%s_melanisation.csv"%(filename)))
+    else:
+        data.to_csv(os.path.join(folder, "%s.csv"%(filename)))

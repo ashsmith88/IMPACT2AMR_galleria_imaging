@@ -88,7 +88,7 @@ def detect_plate_rotation(img):
         return 0 # # TODO: need to check why its 0 and improve above algorithm
     # rotate the image by the median angle
     angle = np.median(np.array(angles))
-    
+
     return angle
 
 def resize_image(img):
@@ -164,13 +164,6 @@ def detect_plate(img, plate_type=None):
     # Generate plate
     currentplate = Plate(plate_type = plate_type)
 
-    """
-    edges = skfilt.sobel(img)
-    ridges = edges > skfilt.threshold_otsu(edges)
-    plt.figure()
-    plt.imshow(ridges)
-    plt.show()
-    """
 
     if "hex" in plate_type:
         # Because the Hexagonal plates are staggered and not straight ridges between wells, the

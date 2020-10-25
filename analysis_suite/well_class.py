@@ -26,7 +26,7 @@ class AllWells(object):
         self.wells = {}
         self.dataframes = {}
 
-    def add_well_info(self, well_num, tpoint= None, area = None, mean_fluo=None, total_fluo=None):
+    def add_well_info(self, well_num, tpoint= None, area = None, mean_fluo=None, total_fluo=None, melanisation=None):
         """
         Adds information about a new well
 
@@ -42,12 +42,14 @@ class AllWells(object):
             the measured mean fluorescence
         total_fluo : int, optional
             the measured integrated fluorescence
+        melanisation : int, optional
+            the median melanisation value (greyscale pixel value)
         """
         # create an instance of SingleWell for the well if it doesn't already exist
         if well_num not in self.wells.keys():
             self.wells[well_num] = SingleWell()
         # add the new data for that timepoint
-        self.wells[well_num].add_tpoint_data(tpoint=tpoint, area=area, mean_fluo=mean_fluo, total_fluo=total_fluo)
+        self.wells[well_num].add_tpoint_data(tpoint=tpoint, area=area, mean_fluo=mean_fluo, total_fluo=total_fluo, melanisation=melanisation)
 
     def create_dataframes(self):
         """
@@ -80,14 +82,17 @@ class SingleWell(object):
         a dictionary where each key is a timepoint and each value is the measured average fluorescence
     total_fluo_dict : dict
         a dictionary where each key is a timepoint and each value is the measured integrated fluorescence
+    melanisation_median : dict
+        a dictionary where each key is a timepoint and each value is the measured melanisation
     """
 
     def __init__(self):
         self.area_dict = {}
         self.mean_fluo_dict = {}
         self.total_fluo_dict = {}
+        self.melanisation_median = {}
 
-    def add_tpoint_data(self, tpoint, area = None, mean_fluo=None, total_fluo=None):
+    def add_tpoint_data(self, tpoint, area = None, mean_fluo=None, total_fluo=None, melanisation=None):
         """
         Adds data to the correct dictionary for the timepoint
 
@@ -101,6 +106,8 @@ class SingleWell(object):
             the measured mean fluorescence
         total_fluo : int, optional
             the measured integrated fluorescence
+        melanisation : int, optional
+            the median melanisation value (greyscale pixel value)
         """
 
         ### TODO: look into assigning this dynamically
@@ -111,3 +118,5 @@ class SingleWell(object):
             self.mean_fluo_dict[tpoint] = mean_fluo
         if total_fluo:
             self.total_fluo_dict[tpoint] = total_fluo
+        if melanisation:
+            self.melanisation_median[tpoint] = melanisation
