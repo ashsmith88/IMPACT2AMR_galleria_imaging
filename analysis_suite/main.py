@@ -55,7 +55,7 @@ def run_batch(folder, plate_type):
         for meas, df in WellData.dataframes.items():
             WellData.dataframes[meas] = df.to_json()
         measurements_json = json.dumps(WellData.dataframes)
-        images_json = json.dumps(result_images, cls=edit.NumpyArrayEncoder)
+        images_json = json.dumps(result_images)
         ### # TODO: Need a save dataframe option
 
 

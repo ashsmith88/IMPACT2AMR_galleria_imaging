@@ -19,11 +19,11 @@ import matplotlib.pyplot as plt
 from skimage.measure import label
 from skimage.external import tifffile
 
-"""
+
 physical_devices = tf.config.experimental.list_physical_devices('GPU')
 assert len(physical_devices) > 0, "Not enough GPU hardware devices available"
 config = tf.config.experimental.set_memory_growth(physical_devices[0], True)
-"""
+
 #from tensorflow.compat.v1 import ConfigProto
 #from tensorflow.compat.v1 import InteractiveSession
 
@@ -46,16 +46,15 @@ def run_model(model, in_folder, out_folder):#
     predict(session)
 
 def run_model2(images, zoom_factor=3):
-    with tf.device('/cpu:0'):
-        images = convert_image_size(images, zoom_factor=zoom_factor)
-        model = "second_model.h5"
-        session = Session()
-        session.dataset = load_connector(images)
-        session.load_model(model)
-        session.set_normalization('local')
-        #run_batch_model(session, in_folder)
-        all_wells = predict(session)
-        all_wells.shrink_images(zoom_factor)
+    images = convert_image_size(images, zoom_factor=zoom_factor)
+    model = "second_model.h5"
+    session = Session()
+    session.dataset = load_connector(images)
+    session.load_model(model)
+    session.set_normalization('local')
+    #run_batch_model(session, in_folder)
+    all_wells = predict(session)
+    all_wells.shrink_images(zoom_factor)
     return all_wells
 
 def convert_image_size(images, zoom_factor=3):
