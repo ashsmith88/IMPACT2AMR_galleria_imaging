@@ -116,7 +116,7 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
         output.save_dict(out_folder, out_file, bio_dict)
         #output.save_dict(out_folder, out_file, melanisation_dict, mel=True)
 
-        result_img = np.stack([img, labelled_wells, labelled_gall])
+        result_img = np.stack([img, labelled_wells, labelled_wells])
         #end = timer()
         #print(end-start, flush=True)
         return bio_dict, melanisation_dict, result_img
