@@ -52,7 +52,7 @@ def run_batch(folder, plate_type):
         # create dictionary of "plottable" dataframes where key is the info (i.e. measurement type)
         # and value is the dataframe
         WellData.create_dataframes()
-        measurements_json, image_json = outp.create_json_objects()
+        #measurements_json, image_json = outp.create_json_objects()
 
     else:
         ### TODO: Need to make proper error logs
@@ -90,12 +90,12 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
 
     """
     Temporary for development of model
-    """
+
     wells = galleria_detection.get_wells(img, labelled_wells)
     all_wells = run_model2(wells, zoom_factor=3.2)
     labelled_gall = galleria_detection.map_galleria(labelled_wells, all_wells)
     #return
-    """
+
     End of temporary
     """
 
@@ -109,11 +109,11 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
         # extract well data from fluo image
         ## TODO: need to extract this on galleria only?
         #bio_dict = meas.extract_biolum_values(labelled_wells, fluo_image)
-        bio_dict = meas.extract_biolum_values(labelled_gall, fluo_image)
-        melanisation_dict = meas.extract_melanisation_values(labelled_gall, img)
+        bio_dict = meas.extract_biolum_values(labelled_wells, fluo_image)
+        melanisation_dict = meas.extract_melanisation_values(labelled_wells, img)
 
         #return bio_dict
-        output.save_img(out_folder, out_file, img, labelled_plate, labelled_wells, labelled_gall)
+        output.save_img(out_folder, out_file, img, labelled_plate, labelled_wells)#, labelled_gall=labelled_gall)
         output.save_dict(out_folder, out_file, bio_dict)
         #output.save_dict(out_folder, out_file, melanisation_dict, mel=True)
 

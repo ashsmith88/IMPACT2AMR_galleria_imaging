@@ -16,12 +16,12 @@ import scipy.ndimage as ndi
 import analysis_suite.data_editing as edit
 import json
 
-def create_json_objects(WellData, result_images)
+def create_json_objects(WellData, result_images):
     out_dict = {}
     for meas, df in WellData.dataframes.items():
         out_dict[meas] = df.to_dict("index")
     measurements_json = json.dumps(out_dict)
-    
+
     images_json = json.dumps(result_images,cls=edit.NumpyArrayEncoder)
     ### # TODO: Need a save dataframe option
 
@@ -34,7 +34,7 @@ def create_json_objects(WellData, result_images)
     """
     return measurements_json, images_json
 
-def save_img(folder, filename, img, labelled_plate, labelled_wells, labelled_gall):
+def save_img(folder, filename, img, labelled_plate, labelled_wells, labelled_gall=None):
     """
     Saves an output image with the wells labelled
 
