@@ -13,7 +13,6 @@ import analysis_suite.data_editing as edit
 import matplotlib.pyplot as plt
 import os
 import numpy as np
-from analysis_suite.run_yapic_model import run_model2
 
 ### TODO: importing temporarily but need to set up test running properly
 import analysis_suite.tests.plate_creator as plate_creat
