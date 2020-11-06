@@ -80,7 +80,14 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
 
     # Load the first image as a numpy array
     img = load.load_image(bf_image_file)
-    img = plate_detection.straighten_plate(img)
+    if img.ndim == 3: # convert it to a greyscale uint16 image
+        #from skimage.color import rgb2gray
+        img = ((img[:,:,0] / 255) * 65535).astype("uint16")
+        #rgb2gray(img)
+
+    angle = plate_detection.detect_plate_rotation(img)
+    img = plate_detection.straighten_plate(img, angle)
+
     out_file = load.get_out_file(bf_image_file)
     # Run plate detection
     labelled_wells, labelled_plate = plate_detection.detect_plate(img, plate_type=plate_type)
@@ -104,12 +111,17 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
     if fluo_image_file:
         # load fluo image
         fluo_image = load.load_image(fluo_image_file)
+        if fluo_image.ndim == 3: # convert it to a greyscale uint16 image
+            #from skimage.color import rgb2gray
+            fluo_image = ((fluo_image[:,:,0] / 255) * 65535).astype("uint16")
+
+        fluo_image = plate_detection.straighten_plate(fluo_image, angle)
 
         fluo_image = edit.normalise_background_fluo(labelled_plate, fluo_image)
         # extract well data from fluo image
         ## TODO: need to extract this on galleria only?
         #bio_dict = meas.extract_biolum_values(labelled_wells, fluo_image)
-        bio_dict = meas.extract_biolum_values(labelled_gall, fluo_image)
+        bio_dict = meas.extract_biolum_values(labelled_wells, fluo_image)
         melanisation_dict = meas.extract_melanisation_values(labelled_gall, img)
 
         #return bio_dict

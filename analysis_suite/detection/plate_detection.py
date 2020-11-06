@@ -20,22 +20,21 @@ from skimage.transform import resize
 
 from analysis_suite.plate_dimensions import Plate
 
-def straighten_plate(img): # pragma: no cover
+def straighten_plate(img, angle): # pragma: no cover
     """
     Takes the original image, determines the angle the plate is rotated and
     counter rotates it to straighen up
-
     Parameters
     ------
     img : ndarray
         2D array containing the original image
-
+    angle : float
+        The angle to rotate by
     Return
     ------
     rotated_img : ndarray
         2D array containing the rotated image
     """
-    angle = detect_plate_rotation(img)
     rotated_img = ndi.rotate(img, angle, mode='reflect')
 
     return rotated_img
