@@ -52,7 +52,7 @@ def run_batch(folder, plate_type):
         # create dictionary of "plottable" dataframes where key is the info (i.e. measurement type)
         # and value is the dataframe
         WellData.create_dataframes()
-        measurements_json, image_json = outp.create_json_objects()
+        #measurements_json, image_json = outp.create_json_objects()
 
     else:
         ### TODO: Need to make proper error logs

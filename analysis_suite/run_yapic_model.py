@@ -18,6 +18,7 @@ import skimage.filters as skfilt
 import matplotlib.pyplot as plt
 from skimage.measure import label
 from skimage.external import tifffile
+import math
 
 
 physical_devices = tf.config.experimental.list_physical_devices('GPU')
@@ -46,7 +47,7 @@ def run_model(model, in_folder, out_folder):#
     predict(session)
 
 def run_model2(images, zoom_factor=3):
-    images = convert_image_size(images, zoom_factor=zoom_factor)
+    images, zoom_factor = convert_image_size(images)#, zoom_factor=zoom_factor)
     model = "second_model.h5"
     session = Session()
     session.dataset = load_connector(images)
@@ -57,14 +58,21 @@ def run_model2(images, zoom_factor=3):
     all_wells.shrink_images(zoom_factor)
     return all_wells
 
-def convert_image_size(images, zoom_factor=3):
+def convert_image_size(images, required_tile_size=317):
     edited_images = []
-    for img in images:
+    for n, img in enumerate(images):
+        if n == 0:
+            x = img.shape[0]
+            y = img.shape[1]
+            # determine the zoom factor. Divide minimum dimension by required size.
+            # Multiply by 10 and round up to nearest integer then divide by 10 so we have it up to nearest decimal place
+            # Then add 0.5 to be safe
+            zoom_factor = (math.ceil((required_tile_size / min(x, y))  * 10) / 10) + 0.5
         img = ndi.zoom(img, zoom_factor)
         img = np.expand_dims(img, axis=0)
         img = np.expand_dims(img, axis=0)
         edited_images.append(img)
-    return edited_images
+    return edited_images, zoom_factor
 
 def load_connector(images):
     """
