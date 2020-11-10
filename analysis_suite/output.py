@@ -16,23 +16,22 @@ import scipy.ndimage as ndi
 import analysis_suite.data_editing as edit
 import json
 
-def create_json_objects(WellData, result_images):
+def create_data_jsons(dataframes):
     out_dict = {}
-    for meas, df in WellData.dataframes.items():
+    for meas, df in dataframes.items():
         out_dict[meas] = df.to_dict("index")
     measurements_json = json.dumps(out_dict)
 
-    images_json = json.dumps(result_images,cls=edit.NumpyArrayEncoder)
-    ### # TODO: Need a save dataframe option
-
+    #images_json = json.dumps(result_images,cls=edit.NumpyArrayEncoder)
+    ### # TODO: Need to have a different approach for images
     """
     # if we want to save them?
-    with open('measurements.json', 'w') as outfile:
+    with open('measurements2.json', 'w') as outfile:
         json.dump(out_dict, outfile)
     with open('images.json', 'w') as outfile:
         json.dump(result_images, outfile, cls=edit.NumpyArrayEncoder)
     """
-    return measurements_json, images_json
+    return measurements_json
 
 def save_img(folder, filename, img, labelled_plate, labelled_wells, labelled_gall):
     """
@@ -108,8 +107,5 @@ def save_dict(folder, filename, dictionary, mel=False):
     ### with different measurements/formats
 
     # convert to pandas dataframe and save
-    data = pd.DataFrame.from_dict(dictionary, orient='index', columns=['Area', 'Mean Fluo', 'Total fluo'])
-    if mel==True:
-        data.to_csv(os.path.join(folder, "%s_melanisation.csv"%(filename)))
-    else:
-        data.to_csv(os.path.join(folder, "%s.csv"%(filename)))
+    data = pd.DataFrame.from_dict(dictionary, orient='index', columns=['Well area', 'Mean Well Fluo', 'Total Well fluo', 'Galleria area', 'Mean Galleria fluo', 'Total Galleria Fluo', 'Melanisation'])
+    data.to_csv(os.path.join(folder, "%s.csv"%(filename)))

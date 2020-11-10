@@ -23,11 +23,13 @@ def extract_biolum_values(labelled_wells, fluo_image):
     bioluminescence_dict : dictionary
         Where key is the region label and value is a list of measurements [area, fluo, integarted fluo]
     """
+    bioluminescence_dict = {}
+    if fluo_image is None:
+        for region in regionprops(labelled_wells):
+            bioluminescence_dict[region.label] = [region.area, 0, 0]
+        return bioluminescence_dict
 
     fluo_image = np.array(fluo_image)
-
-    bioluminescence_dict = {}
-
     for region in regionprops(labelled_wells):
         # get mean fluo from the galleria area in matching fluo image
         fluo = np.mean(fluo_image[tuple(np.array(region.coords).T)])

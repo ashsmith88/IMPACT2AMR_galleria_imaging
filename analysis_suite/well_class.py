@@ -26,7 +26,8 @@ class AllWells(object):
         self.wells = {}
         self.dataframes = {}
 
-    def add_well_info(self, well_num, tpoint= None, area = None, mean_fluo=None, total_fluo=None, melanisation=None):
+    def add_well_info(self, well_num, tpoint= None, area_well = None, mean_fluo_well=None, total_fluo_well=None, melanisation=None,
+                    area_gall=None, mean_fluo_gall=None, total_fluo_gall=None):
         """
         Adds information about a new well
 
@@ -49,7 +50,8 @@ class AllWells(object):
         if well_num not in self.wells.keys():
             self.wells[well_num] = SingleWell()
         # add the new data for that timepoint
-        self.wells[well_num].add_tpoint_data(tpoint=tpoint, area=area, mean_fluo=mean_fluo, total_fluo=total_fluo, melanisation=melanisation)
+        self.wells[well_num].add_tpoint_data(tpoint=tpoint, area_well=area_well, mean_fluo_well=mean_fluo_well, total_fluo_well=total_fluo_well, melanisation=melanisation,
+                                            area_gall=area_gall, mean_fluo_gall=mean_fluo_gall, total_fluo_gall=total_fluo_gall)
 
     def create_dataframes(self):
         """
@@ -87,12 +89,15 @@ class SingleWell(object):
     """
 
     def __init__(self):
-        self.area_dict = {}
-        self.mean_fluo_dict = {}
-        self.total_fluo_dict = {}
+        self.well_area_dict = {}
+        self.well_mean_fluo_dict = {}
+        self.well_total_fluo_dict = {}
+        self.gall_area_dict = {}
+        self.gall_mean_fluo_dict = {}
+        self.gall_total_fluo_dict = {}
         self.melanisation_median = {}
 
-    def add_tpoint_data(self, tpoint, area = None, mean_fluo=None, total_fluo=None, melanisation=None):
+    def add_tpoint_data(self, tpoint, area_well = None, mean_fluo_well=None, total_fluo_well=None, melanisation=None, area_gall=None, mean_fluo_gall=None, total_fluo_gall=None):
         """
         Adds data to the correct dictionary for the timepoint
 
@@ -111,12 +116,17 @@ class SingleWell(object):
         """
 
         ### TODO: look into assigning this dynamically
-
-        if area:
-            self.area_dict[tpoint] = area
-        if mean_fluo:
-            self.mean_fluo_dict[tpoint] = mean_fluo
-        if total_fluo:
-            self.total_fluo_dict[tpoint] = total_fluo
+        if area_well:
+            self.well_area_dict[tpoint] = area_well
+        if mean_fluo_well:
+            self.well_mean_fluo_dict[tpoint] = mean_fluo_well
+        if total_fluo_well:
+            self.well_total_fluo_dict[tpoint] = total_fluo_well
+        if area_gall:
+            self.gall_area_dict[tpoint] = area_gall
+        if mean_fluo_gall:
+            self.gall_mean_fluo_dict[tpoint] = mean_fluo_gall
+        if total_fluo_gall:
+            self.gall_total_fluo_dict[tpoint] = total_fluo_gall
         if melanisation:
             self.melanisation_median[tpoint] = melanisation
