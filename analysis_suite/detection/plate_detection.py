@@ -184,6 +184,10 @@ def detect_plate(img, plate_type=None):
 
     start_x, end_x, start_y, end_y = move_plate_mask(start_x, end_x, x_gap, start_y, end_y, y_gap, img)
 
+    # occasionally it still starts on the second row or the second column. The intensity of the plate mask when overlaid
+    # on the image will be greatest when it is correctly aligned, so we can shift it iteratively to find the correct place if it is slightly out
+    start_x, end_x, start_y, end_y = check_alignment_by_intensity(start_x, end_x, x_gap, start_y, end_y, y_gap, img)
+
     # create an image the same size as the original image and set the plate to the correct location
     # to match where the plate is found on the original image
     masked_wells = np.zeros(img.shape)
@@ -196,6 +200,82 @@ def detect_plate(img, plate_type=None):
     labelled_plate = skmeas.label(masked_plate, return_num=False)
 
     return labelled_wells, labelled_plate
+
+def check_alignment_by_intensity(start_x, end_x, gap_x, start_y, end_y, gap_y, img):
+    """
+    Takes the plate positions and moves it up and left iteratively, measuring the image intensity at each point
+    when the mask has the best intensity, this is likely the correct position
+    Parameters
+    ------
+    Parameters
+    ------
+    start_x : int
+        The x coordinate of the left hand side of the plate
+    end_x : int
+        The x coordinate of the right hand side of the plate
+    gap_x : int
+        The gap in pixels between the start of each well (x axis)
+    start_y : int
+        The y coordinate of the top of the plate
+    end_y : int
+        The y coordinate of the bottom of the plate
+    gap_y : int
+        The gap in pixels between the start of each well (y axis)
+    img : 2D array
+        Original image
+    Returns
+    ------
+    start_x : int
+        The x coordinate of the left hand side of the plate
+    end_x : int
+        The x coordinate of the right hand side of the plate
+    start_y : int
+        The y coordinate of the top of the plate
+    end_y : int
+        The y coordinate of the bottom of the plate
+    """
+    # create a mask
+    mask = np.zeros(img.shape)
+    # set the plate to 1
+    mask[start_y:end_y, start_x:end_x] = 1
+    # initially set our first x and y values as our best and determine the mean intensity
+    best_start_x = start_x
+    best_end_x = end_x
+    best_start_y = start_y
+    best_end_y = end_y
+    best_int_mean = np.mean(img[mask==1])
+
+    # gradually shift the plate to the left and measure the intensity
+    for n in range(1, 6):
+        temp_start_x = start_x - int((n * gap_x))
+        temp_end_x = end_x - int((n * gap_x))
+        if temp_start_x > 0:
+            mask = np.zeros(img.shape)
+            mask[start_y:end_y, temp_start_x:temp_end_x] = 1
+            intensity = np.sum(img[mask==1])
+            int_mean = np.mean(img[mask==1])
+            # if the intensity is better then replace the best values
+            if int_mean > best_int_mean:
+                best_int_mean = int_mean
+                best_start_x = temp_start_x
+                best_end_x = temp_end_x
+
+    # repeat for y
+    for n in range(1, 6):
+        temp_start_y = start_y - int((n * gap_y))
+        temp_end_y = end_y - int((n * gap_y))
+        if temp_start_y > 0:
+            mask = np.zeros(img.shape)
+            mask[temp_start_y:temp_end_y, best_start_x:best_end_x] = 1
+            intensity = np.sum(img[mask==1])
+            int_mean = np.mean(img[mask==1])
+            if int_mean > best_int_mean:
+                best_int_mean = int_mean
+                best_start_y = temp_start_y
+                best_end_y = temp_end_y
+
+    return best_start_x, best_end_x, best_start_y, best_end_y
+
 
 def move_plate_mask(start_x, end_x, gap_x, start_y, end_y, gap_y, img):
     """
