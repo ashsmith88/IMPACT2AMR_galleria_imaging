@@ -35,7 +35,7 @@ def load_image(filepath):
     ------
     img : ndarray
         The image
-    """
+    """#
     if filepath.lower().endswith("tif"):
         loaded_image = load_tiff_file(filepath)
     elif filepath.lower().endswith("1sc"):

@@ -25,3 +25,6 @@ lib/
 *model.h5
 *.json
 *blah.h5
+
+*temp.py
+*.p

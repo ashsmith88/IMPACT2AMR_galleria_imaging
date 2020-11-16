@@ -21,7 +21,7 @@ import analysis_suite.output as output
 from analysis_suite.well_class import AllWells
 
 
-def run_batch(folder, plate_type):
+def run_batch(folder, plate_type, exposure=300):
     """
     Takes a folder containing image files and passes them to the analysis pipeline
 
@@ -37,7 +37,7 @@ def run_batch(folder, plate_type):
     result_images = {}
     if os.path.isdir(folder):
         # get a list of files and timepoints
-        all_files, all_tpoints = load.get_image_files(folder, exposure_time='300')
+        all_files, all_tpoints = load.get_image_files(folder, exposure_time=exposure)
         for files, tpoint in zip(all_files, all_tpoints):
             # create output folder
             out_folder = load.create_out_folder(folder)
@@ -74,9 +74,12 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
     if len(filename) == 2:
         fluo_image_file = filename[1]
         bf_image_file = filename[0]
-    else:
+    elif isinstance(filename, list):
         fluo_image_file = None
         bf_image_file = filename[0]
+    elif isinstance(filename, str):
+        fluo_image_file = None
+        bf_image_file = filename
 
     # Load the first image as a numpy array
     img = load.load_image(bf_image_file)

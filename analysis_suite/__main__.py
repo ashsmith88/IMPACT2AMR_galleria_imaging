@@ -20,12 +20,16 @@ PARSER.add_argument("plate", choices = ["rect50", "rect40", "hex50"],
 PARSER.add_argument("-batch", action="store_true",
                     help="A folder containing multiple image areas to run at the same time"
                     )
+PARSER.add_argument("-exposure", "-e", type=str, default="300",
+                    help="The exposure time used for bioluminescence, used to identify the files based on naming"
+                    )
 ARGS = PARSER.parse_args()
 
 if ARGS.batch:
     run_batch(
         ARGS.filename,
         ARGS.plate,
+        exposure=ARGS.exposure,
         )
 else:
     run_analysis(
