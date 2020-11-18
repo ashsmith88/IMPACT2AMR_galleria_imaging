@@ -66,8 +66,8 @@ def convert_image_size(images, required_tile_size=317):
             y = img.shape[1]
             # determine the zoom factor. Divide minimum dimension by required size.
             # Multiply by 10 and round up to nearest integer then divide by 10 so we have it up to nearest decimal place
-            # Then add 0.75 to be safe
-            zoom_factor = (math.ceil((required_tile_size / min(x, y))  * 10) / 10) + 0.75
+            # Then add 0.5 to be safe
+            zoom_factor = (math.ceil((required_tile_size / min(x, y))  * 10) / 10) + 0.5
         img = ndi.zoom(img, zoom_factor)
         img = np.expand_dims(img, axis=0)
         img = np.expand_dims(img, axis=0)
