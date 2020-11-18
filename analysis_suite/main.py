@@ -13,7 +13,7 @@ import analysis_suite.data_editing as edit
 import matplotlib.pyplot as plt
 import os
 import numpy as np
-from analysis_suite.run_yapic_model import run_model2
+from analysis_suite.run_yapic_model import run_model
 
 ### TODO: importing temporarily but need to set up test running properly
 import analysis_suite.tests.plate_creator as plate_creat
@@ -108,8 +108,9 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
     Temporary for development of model
     """
     wells = galleria_detection.get_wells(img, labelled_wells)
-    all_wells = run_model2(wells, zoom_factor=3.2)
-    labelled_gall = galleria_detection.map_galleria(labelled_wells, all_wells)
+    all_wells = run_model(wells, zoom_factor=3.2)
+    if all_wells is not None:
+        labelled_gall = galleria_detection.map_galleria(labelled_wells, all_wells)
     #return
     """
     End of temporary

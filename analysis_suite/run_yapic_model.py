@@ -25,40 +25,28 @@ physical_devices = tf.config.experimental.list_physical_devices('GPU')
 assert len(physical_devices) > 0, "Not enough GPU hardware devices available"
 config = tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
-#from tensorflow.compat.v1 import ConfigProto
-#from tensorflow.compat.v1 import InteractiveSession
+def run_model(images, zoom_factor=3):
+    buff = 0
+    while buff <= 1:
+        try:
+            tf.keras.backend.clear_session()
+            converted_images, zoom_factor = convert_image_size(images, buffer=buff)#, zoom_factor=zoom_factor)
+            model = "second_model.h5"
+            session = Session()
+            session.dataset = load_connector(converted_images)
+            session.load_model(model)
+            session.set_normalization('local')
+            #run_batch_model(session, in_folder)
+            all_wells = predict(session)
+            all_wells.shrink_images(zoom_factor)
+            return all_wells
+            break
+        except:
+            buff += 0.25
+            continue
+    return None
 
-#config = ConfigProto()
-#config.gpu_options.allow_growth = True
-#session = InteractiveSession(config=config
-
-def run_model(model, in_folder, out_folder):#
-    session = Session()
-    #session.dataset = load_prediction_data(images)
-    #t = TiffConnector(in_folder, '/tmp/this_should_not_exist')
-    #print(t.filenames)
-    session.load_prediction_data(in_folder, out_folder)
-    #test = session.dataset.pixel_connector.image_dimensions(1)
-    #print(test)
-    session.load_model(model)
-    session.set_normalization('local')
-
-    #run_batch_model(session, in_folder)
-    predict(session)
-
-def run_model2(images, zoom_factor=3):
-    images, zoom_factor = convert_image_size(images)#, zoom_factor=zoom_factor)
-    model = "second_model.h5"
-    session = Session()
-    session.dataset = load_connector(images)
-    session.load_model(model)
-    session.set_normalization('local')
-    #run_batch_model(session, in_folder)
-    all_wells = predict(session)
-    all_wells.shrink_images(zoom_factor)
-    return all_wells
-
-def convert_image_size(images, required_tile_size=317):
+def convert_image_size(images, required_tile_size=317, buffer=0):
     edited_images = []
     for n, img in enumerate(images):
         if n == 0:
@@ -66,8 +54,8 @@ def convert_image_size(images, required_tile_size=317):
             y = img.shape[1]
             # determine the zoom factor. Divide minimum dimension by required size.
             # Multiply by 10 and round up to nearest integer then divide by 10 so we have it up to nearest decimal place
-            # Then add 0.5 to be safe
-            zoom_factor = (math.ceil((required_tile_size / min(x, y))  * 10) / 10) + 0.5
+            # Then add a buffer to be sure
+            zoom_factor = (math.ceil((required_tile_size / min(x, y))  * 10) / 10) + buffer
         img = ndi.zoom(img, zoom_factor)
         img = np.expand_dims(img, axis=0)
         img = np.expand_dims(img, axis=0)

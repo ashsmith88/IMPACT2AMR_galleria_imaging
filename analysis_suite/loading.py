@@ -110,6 +110,8 @@ def get_image_files(folder, exposure_time = "300", filetype=".tif"):
         # Add the timepoint but drop the "t" so it is just an integer
         all_tpoints.append(int(re.search(r'\d+',t).group()))
     # We need to check they are all the same length sublists or remove them
+    if len(all_files) <=1:
+        return all_files, all_tpoints
     lens = Counter(len(i) for i in all_files)
     most_common_length = lens.most_common(1)[0][0]
     indices_to_remove = [n for n, x in enumerate(all_files) if len(x) != most_common_length]
