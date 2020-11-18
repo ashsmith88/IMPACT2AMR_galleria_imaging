@@ -43,7 +43,7 @@ def run_batch(folder, plate_type, exposure=300):
             out_folder = load.create_out_folder(folder)
             # analyse a tpoint brightfield and fluorescent image
             melanisation_dict, bio_dict_wells, bio_dict_gall = run_analysis(files, tpoint=tpoint, plate_type=plate_type, out_folder=out_folder)
-            if bio_dict is None or melanisation_dict is None or result_img is None:
+            if bio_dict_wells is None or melanisation_dict is None or bio_dict_gall is None:
                 # TODO: add error message
                 continue
             # add info for each bacteria to the WellData class instance
