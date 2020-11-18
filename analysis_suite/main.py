@@ -43,6 +43,9 @@ def run_batch(folder, plate_type, exposure=300):
             out_folder = load.create_out_folder(folder)
             # analyse a tpoint brightfield and fluorescent image
             melanisation_dict, bio_dict_wells, bio_dict_gall = run_analysis(files, tpoint=tpoint, plate_type=plate_type, out_folder=out_folder)
+            if bio_dict is None or melanisation_dict is None or result_img is None:
+                # TODO: add error message
+                continue
             # add info for each bacteria to the WellData class instance
             for well, data_values in bio_dict_wells.items():
                 melanisation = melanisation_dict[well][1]
@@ -94,6 +97,9 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
     out_file = load.get_out_file(bf_image_file)
     # Run plate detection
     labelled_wells, labelled_plate = plate_detection.detect_plate(img, plate_type=plate_type)
+    if labelled_wells is None or labelled_plate is None:
+        ## TODO:  add error message
+        return None, None, None
     labelled_gall = None
     # only run for training
     #galleria_detection.save_wells_for_training(img, labelled_wells, tpoint, filename[0])
