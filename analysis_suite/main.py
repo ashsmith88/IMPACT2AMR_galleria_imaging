@@ -56,7 +56,7 @@ def run_batch(folder, plate_type, exposure=300):
         # create dictionary of "plottable" dataframes where key is the info (i.e. measurement type)
         # and value is the dataframe
         WellData.create_dataframes()
-        measurements_json = output.create_data_json(WellData.dataframes)
+        measurements_json = output.create_data_jsons(WellData.dataframes)
     else:
         ### TODO: Need to make proper error logs
         print("not a folder!")
