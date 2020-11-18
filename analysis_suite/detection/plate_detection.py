@@ -172,6 +172,8 @@ def detect_plate(img, plate_type=None):
         start_x, end_x, start_y, end_y = get_corners_from_edges(img)
     else:
         start_x, start_y, x_gap, y_gap = get_first_well_and_gaps(img, currentplate._no_rows, currentplate._no_columns, plate_type=plate_type)
+        if None in [start_x, start_y, x_gap, y_gap]:
+            return None, None
         start_x, end_x, start_y, end_y = currentplate.get_plate_corners(start_x, start_y, x_gap, y_gap)
 
     # create mask the size of the bbox
@@ -540,10 +542,14 @@ def find_first_well(profile, num_peaks, perc=90):
 
     # identify peaks which fall in a consistent gap range (added 20% to median to cover small variations)
     consistent_gaps = np.array(((med-(med*0.1)) < diff) & (diff < (med+(med*0.1))))
+    if sum(consistent_gaps) == 0:
+        return None, None
     # get the first gap
     first_gap = np.where(consistent_gaps == True)[0][0]
     coord = best_peaks[first_gap]
 
+    # lets update the median using only the consistent_gaps
+    med = np.median(diff[np.where(consistent_gaps == True)])
     # using the first identified peak and the calculated gap, lets interpolate where we may find
     # a missed peak
     possible_missed = [(coord - (med * n)) for n in range(1, 10) if (coord - (med * n) > 0)]

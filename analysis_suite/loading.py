@@ -10,6 +10,7 @@ import analysis_suite.BR_reader.reader as biorad_reader
 import re
 import numpy as np
 from skimage.external import tifffile
+from collections import Counter
 
 
 def create_out_folder(folder):
@@ -109,4 +110,13 @@ def get_image_files(folder, exposure_time = "300", filetype=".tif"):
         all_files.append(sorted(tpoint_files, reverse=True))
         # Add the timepoint but drop the "t" so it is just an integer
         all_tpoints.append(int(re.search(r'\d+',t).group()))
+
+    # We need to check they are all the same length sublists or remove them
+    lens = Counter(len(i) for i in all_files)
+    most_common_length = lens.most_common(1)[0][0]
+    indices_to_remove = [n for n, x in enumerate(all_files) if len(x) != most_common_length]
+    indices_to_remove = [i for i in sorted(indices_to_remove, reverse=True)]
+    for ind in indices_to_remove:
+        all_files.pop(ind)
+        all_tpoints.pop(ind)
     return all_files, all_tpoints

@@ -37,11 +37,15 @@ def run_batch(folder, plate_type):
     if os.path.isdir(folder):
         # get a list of files and timepoints
         all_files, all_tpoints = load.get_image_files(folder, exposure_time='300')
+
         for files, tpoint in zip(all_files, all_tpoints):
             # create output folder
             out_folder = load.create_out_folder(folder)
             # analyse a tpoint brightfield and fluorescent image
             bio_dict, melanisation_dict, result_img = run_analysis(files, tpoint=tpoint, plate_type=plate_type, out_folder=out_folder)
+            if bio_dict is None or melanisation_dict is None or result_img is None:
+                # TODO: add error message
+                continue
             # add info for each bacteria to the WellData class instance
             for well, data_values in bio_dict.items():
                 melanisation = melanisation_dict[well][1]
@@ -71,12 +75,12 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
     #start = timer()
     # TODO: review this as only temporary solution
     if isinstance(filename, list):
-        fluo_image_file = filename[1]
         bf_image_file = filename[0]
+        if len(filename) == 2:
+            fluo_image_file = filename[1]
     else:
         fluo_image_file = None
         bf_image_file = filename
-
     # Load the first image as a numpy array
     img = load.load_image(bf_image_file)
     if img.ndim == 3: # convert it to a greyscale uint16 image
@@ -89,7 +93,9 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
     out_file = load.get_out_file(bf_image_file)
     # Run plate detection
     labelled_wells, labelled_plate = plate_detection.detect_plate(img, plate_type=plate_type)
-
+    if labelled_wells is None or labelled_plate is None:
+        ## TODO:  add error message
+        return None, None, None
     # only run for training
     #galleria_detection.save_wells_for_training(img, labelled_wells, tpoint, filename[0])
 
