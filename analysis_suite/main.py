@@ -21,7 +21,7 @@ import analysis_suite.output as output
 from analysis_suite.well_class import AllWells
 
 
-def run_batch(folder, plate_type, exposure=300):
+def run_batch(folder, plate_type, exposure='300'):
     """
     Takes a folder containing image files and passes them to the analysis pipeline
 
@@ -56,8 +56,8 @@ def run_batch(folder, plate_type, exposure=300):
         # create dictionary of "plottable" dataframes where key is the info (i.e. measurement type)
         # and value is the dataframe
         WellData.create_dataframes()
-        measurements_json = output.create_data_jsons(WellData.dataframes)
-        #return measurements_json
+        measurements_json = output.create_data_jsons(WellData.dataframes, out_folder=out_folder)
+        return measurements_json
     else:
         ### TODO: Need to make proper error logs
         print("not a folder!")

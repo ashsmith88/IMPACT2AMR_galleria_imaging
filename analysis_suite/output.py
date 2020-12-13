@@ -16,12 +16,13 @@ import scipy.ndimage as ndi
 import analysis_suite.data_editing as edit
 import json
 
-def create_data_jsons(dataframes):
+def create_data_jsons(dataframes, out_folder=None):
     out_dict = {}
     for meas, df in dataframes.items():
         out_dict[meas] = df.to_dict("index")
     measurements_json = json.dumps(out_dict)
-
+    with open(os.path.join(out_folder, 'measurements.json'), 'w') as outfile:
+        json.dump(out_dict, outfile)
     #images_json = json.dumps(result_images,cls=edit.NumpyArrayEncoder)
     ### # TODO: Need to have a different approach for images
     """
