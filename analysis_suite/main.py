@@ -57,7 +57,7 @@ def run_batch(folder, plate_type, exposure='300'):
         # and value is the dataframe
         WellData.create_dataframes()
         measurements_json = output.create_data_jsons(WellData.dataframes, out_folder=out_folder)
-        return measurements_json
+        return WellData.dataframes
     else:
         ### TODO: Need to make proper error logs
         print("not a folder!")
