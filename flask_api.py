@@ -6,7 +6,7 @@ import time
 
 import sys
 
-sys.path.append("/run/media/ashley/DATA/BiosystemsTechnology/galleria_imaging/")
+sys.path.append(".")
 
 import analysis_suite.main as main
 
