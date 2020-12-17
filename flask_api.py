@@ -67,5 +67,5 @@ def create_directory():
 if __name__ == '__main__':
     #app.run(host='localhost', port=8080) # for development
 
-    serve(app, host='0.0.0.0',port=server_port) # for deployment
-    #serve(app, host='0.0.0.0', port=5000) # for deployment with specific port 
+    serve(app, host='0.0.0.0',port=8080) # for deployment
+    #serve(app, host='0.0.0.0', port=5000) # for deployment with specific port
