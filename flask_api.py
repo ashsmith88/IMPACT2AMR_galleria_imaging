@@ -1,6 +1,7 @@
 import os
 import shutil
 from flask import Flask, request, abort, jsonify, send_from_directory, send_file
+from flask_cors import CORS
 import json
 import time
 from waitress import serve
@@ -12,6 +13,7 @@ sys.path.append(".")
 import analysis_suite.main as main
 
 app = Flask(__name__)
+CORS(app)
 
 upload_directory = os.getcwd()
 if not os.path.exists(upload_directory):
