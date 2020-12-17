@@ -3,6 +3,7 @@ import shutil
 from flask import Flask, request, abort, jsonify, send_from_directory, send_file
 import json
 import time
+from waitress import serve
 
 import sys
 
@@ -64,4 +65,7 @@ def create_directory():
     return dir, timestamp
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=8080)
+    #app.run(host='localhost', port=8080) # for development
+
+    serve(app, host='0.0.0.0',port=server_port) # for deployment
+    #serve(app, host='0.0.0.0', port=5000) # for deployment with specific port 
