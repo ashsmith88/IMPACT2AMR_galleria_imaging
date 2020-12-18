@@ -50,11 +50,11 @@ be adjusted to interact properly with the frontend software
 
 ## Production Deployment *Incomplete*
 
-$ mkdir /var/www/galleria-imaging
-$ cd /var/www/galleria-imaging
-$ sudo -u [APP_USER] -H git clone https://github.com/ashsmith88/galleria_imaging.git code
-upload the second_model.h5 file (provided seperately due to size) to /var/www/galleria-imaging/code 
-$ cd /var/www/galleria-imaging
-$ conda create --name <env_name> --file code/requirements.txt
-$ conda activate <env_name>
+$ mkdir /var/www/galleria-imaging  
+$ cd /var/www/galleria-imaging  
+$ sudo -u [APP_USER] -H git clone https://github.com/ashsmith88/galleria_imaging.git code  
+upload the second_model.h5 file (provided seperately due to size) to /var/www/galleria-imaging/code  
+$ cd /var/www/galleria-imaging  
+$ conda create --name <env_name> --file code/requirements.txt  
+$ conda activate <env_name>  
 $ python code/flask_api.py
