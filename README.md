@@ -57,4 +57,5 @@ upload the second_model.h5 file (provided seperately due to size) to /var/www/ga
 $ cd /var/www/galleria-imaging  
 $ conda create --name <env_name> --file code/requirements.txt  
 $ conda activate <env_name>  
-$ python code/flask_api.py
+$ cd /var/www/galleria-imaging/code 
+$ python flask_api.py
