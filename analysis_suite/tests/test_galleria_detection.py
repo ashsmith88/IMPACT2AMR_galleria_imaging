@@ -42,14 +42,6 @@ class TestDetectGalleria(unittest.TestCase):
         mismatch = (np.count_nonzero(self.label != detected_gall)) / (self.well.shape[0] * self.well.shape[1])
         self.assertTrue(mismatch < 0.01)
 
-    def test_detect_galleria(self):
-        well_dict, labelled_gall = galleria_detection.detect_galleria(self.image_in, self.well_image.astype(int))
-        self.assertEqual(sorted(well_dict.keys()), sorted(self.out_dict.keys()))
-        for key, val in well_dict.items():
-            mismatch = (np.count_nonzero(val != self.out_dict[key])) / (val.shape[0] * val.shape[1])
-            self.assertTrue(mismatch < 0.01)
-        mismatch = (np.count_nonzero(labelled_gall != self.image_out)) / (labelled_gall.shape[0] * labelled_gall.shape[1])
-        self.assertTrue(mismatch < 0.01)
 
 class TestMapGalleriaPlate(unittest.TestCase):
     """
@@ -111,9 +103,9 @@ class TestMapGalleriaPlate(unittest.TestCase):
                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
 
-    def test_map_galleria(self):
-        labelled_gall = galleria_detection.map_galleria(self.labelled_wells, self.galleria_dict)
-        np.testing.assert_array_equal(self.labelled_gall, labelled_gall)
+#    def test_map_galleria(self):
+#        labelled_gall = galleria_detection.map_galleria(self.labelled_wells, self.galleria_dict)
+#        np.testing.assert_array_equal(self.labelled_gall, labelled_gall)
 
 class TestFindEdgesToCrop(unittest.TestCase):
     """

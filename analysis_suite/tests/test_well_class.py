@@ -43,17 +43,17 @@ class TestAllWellsClass(unittest.TestCase):
 
     def test_add_well_info(self):
 
-        self.assertEqual(self.area_dict, self.allwells.wells[1].area_dict)
-        self.assertEqual(self.mean_fluo_dict, self.allwells.wells[1].mean_fluo_dict)
-        self.assertEqual(self.total_fluo_dict, self.allwells.wells[1].total_fluo_dict)
-        self.assertEqual(self.area_dict2, self.allwells.wells[2].area_dict)
-        self.assertEqual(self.mean_fluo_dict2, self.allwells.wells[2].mean_fluo_dict)
-        self.assertEqual(self.total_fluo_dict2, self.allwells.wells[2].total_fluo_dict)
+        self.assertEqual(self.area_dict, self.allwells.wells[1].well_area_dict)
+        self.assertEqual(self.mean_fluo_dict, self.allwells.wells[1].well_mean_fluo_dict)
+        self.assertEqual(self.total_fluo_dict, self.allwells.wells[1].well_total_fluo_dict)
+        self.assertEqual(self.area_dict2, self.allwells.wells[2].well_area_dict)
+        self.assertEqual(self.mean_fluo_dict2, self.allwells.wells[2].well_mean_fluo_dict)
+        self.assertEqual(self.total_fluo_dict2, self.allwells.wells[2].well_total_fluo_dict)
 
     def test_create_dataframes(self):
-        pd.testing.assert_frame_equal(self.allwells.dataframes['area_dict'], self.area)
-        pd.testing.assert_frame_equal(self.allwells.dataframes['mean_fluo_dict'], self.fluo)
-        pd.testing.assert_frame_equal(self.allwells.dataframes['total_fluo_dict'], self.fluo_total)
+        pd.testing.assert_frame_equal(self.allwells.dataframes['well_area_dict'], self.area)
+        pd.testing.assert_frame_equal(self.allwells.dataframes['well_mean_fluo_dict'], self.fluo)
+        pd.testing.assert_frame_equal(self.allwells.dataframes['well_total_fluo_dict'], self.fluo_total)
 
 
 
@@ -75,6 +75,6 @@ class TestSingleWellClass(unittest.TestCase):
         well = SingleWell()
         well.add_tpoint_data(self.input0[0], self.input0[1], self.input0[2], self.input0[3])
         well.add_tpoint_data(self.input1[0], self.input1[1], self.input1[2], self.input1[3])
-        self.assertEqual(self.area_dict, well.area_dict)
-        self.assertEqual(self.mean_fluo_dict, well.mean_fluo_dict)
-        self.assertEqual(self.total_fluo_dict, well.total_fluo_dict)
+        self.assertEqual(self.area_dict, well.well_area_dict)
+        self.assertEqual(self.mean_fluo_dict, well.well_mean_fluo_dict)
+        self.assertEqual(self.total_fluo_dict, well.well_total_fluo_dict)
