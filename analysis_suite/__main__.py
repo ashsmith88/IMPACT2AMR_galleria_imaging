@@ -16,7 +16,7 @@ PARSER = argparse.ArgumentParser(
 PARSER.add_argument("filename", type=str,
                     help="Data file(s) to load and analyse")
 PARSER.add_argument("plate", choices = ["rect50", "rect40", "hex50"],
-                    help="The type of plate being used")
+                    help="The type of plate being used", default="rect50")
 PARSER.add_argument("-batch", action="store_true",
                     help="A folder containing multiple image areas to run at the same time"
                     )

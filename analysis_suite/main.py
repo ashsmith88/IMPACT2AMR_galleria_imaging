@@ -21,7 +21,7 @@ import analysis_suite.output as output
 from analysis_suite.well_class import AllWells
 
 
-def run_batch(folder, plate_type, exposure='300'):
+def run_batch(folder, plate_type="rect50", exposure='300', from_gui=False):
     """
     Takes a folder containing image files and passes them to the analysis pipeline
 
@@ -42,7 +42,7 @@ def run_batch(folder, plate_type, exposure='300'):
             # create output folder
             out_folder = load.create_out_folder(folder)
             # analyse a tpoint brightfield and fluorescent image
-            melanisation_dict, bio_dict_wells, bio_dict_gall = run_analysis(files, tpoint=tpoint, plate_type=plate_type, out_folder=out_folder)
+            melanisation_dict, bio_dict_wells, bio_dict_gall = run_analysis(files, plate_type=plate_type, out_folder=out_folder)
             if bio_dict_wells is None or melanisation_dict is None or bio_dict_gall is None:
                 # TODO: add error message
                 continue
@@ -57,12 +57,14 @@ def run_batch(folder, plate_type, exposure='300'):
         # and value is the dataframe
         WellData.create_dataframes()
         measurements_json = output.create_data_jsons(WellData.dataframes, out_folder=out_folder)
+        if from_gui:
+            return out_folder
         return WellData.dataframes
     else:
         ### TODO: Need to make proper error logs
         print("not a folder!")
 
-def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
+def run_analysis(filename, plate_type=None, out_folder=None):
     """
     Runs the main analysis pipeline
 
@@ -71,10 +73,6 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
     filename : list
         A list of filenames to analyse
     """
-    ### TODO: need to review if we want input as list or individual string
-    #from timeit import default_timer as timer
-    #start = timer()
-    # TODO: review this as only temporary solution
     if len(filename) == 2:
         fluo_image_file = filename[1]
         bf_image_file = filename[0]
@@ -88,9 +86,7 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
     # Load the first image as a numpy array
     img = load.load_image(bf_image_file)
     if img.ndim == 3: # convert it to a greyscale uint16 image
-        #from skimage.color import rgb2gray
         img = ((img[:,:,0] / 255) * 65535).astype("uint16")
-        #rgb2gray(img)
 
     angle = plate_detection.detect_plate_rotation(img)
     img = plate_detection.straighten_plate(img, angle)
@@ -102,36 +98,21 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
         ## TODO:  add error message
         return None, None, None
     labelled_gall = None
-    # only run for training
-    #galleria_detection.save_wells_for_training(img, labelled_wells, tpoint, filename[0])
 
-    """
-    Temporary for development of model
-    """
     wells = galleria_detection.get_wells(img, labelled_wells)
-    all_wells = run_model(wells, zoom_factor=3.2)
+    all_wells = run_model(wells)
     if all_wells is not None:
         labelled_gall = galleria_detection.map_galleria(labelled_wells, all_wells)
-    #return
-    """
-    End of temporary
-    """
-
-    #well_dict, labelled_gall = galleria_detection.detect_galleria(img, labelled_wells)
 
     if fluo_image_file:
         # load fluo image
         fluo_image = load.load_image(fluo_image_file)
         if fluo_image.ndim == 3: # convert it to a greyscale uint16 image
-            #from skimage.color import rgb2gray
             fluo_image = ((fluo_image[:,:,0] / 255) * 65535).astype("uint16")
 
         fluo_image = plate_detection.straighten_plate(fluo_image, angle)
 
         fluo_image = edit.normalise_background_fluo(labelled_plate, fluo_image)
-        # extract well data from fluo image
-        ## TODO: need to extract this on galleria only?
-        #bio_dict = meas.extract_biolum_values(labelled_wells, fluo_image)
     else:
         fluo_image = None
 
@@ -150,7 +131,4 @@ def run_analysis(filename, plate_type, tpoint=None, out_folder=None):
 
     output.save_img(out_folder, out_file, img, labelled_plate, labelled_wells, labelled_gall)
     output.save_dict(out_folder, out_file, all_data)
-    #output.save_dict(out_folder, out_file, melanisation_dict, mel=True))
-    #end = timer()
-    #print(end-start, flush=True)
     return melanisation_dict, bio_dict_wells, bio_dict_gall
