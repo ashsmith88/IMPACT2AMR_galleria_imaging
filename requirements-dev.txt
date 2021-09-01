@@ -1,0 +1,5 @@
+PyQt5==5.15.4
+matplotlib==3.4.3
+scikit-image==0.18.3
+sklearn==0.0
+yapic==1.0.1

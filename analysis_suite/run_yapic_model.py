@@ -17,7 +17,6 @@ import scipy.ndimage as ndi
 import skimage.filters as skfilt
 import matplotlib.pyplot as plt
 from skimage.measure import label
-from skimage.external import tifffile
 import math
 
 

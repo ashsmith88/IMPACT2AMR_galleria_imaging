@@ -9,7 +9,8 @@ import skimage.io as skio
 import analysis_suite.BR_reader.reader as biorad_reader
 import re
 import numpy as np
-from skimage.external import tifffile
+#from skimage.external import tifffile
+from PIL import Image
 from collections import Counter
 
 def create_out_folder(folder):
@@ -58,7 +59,8 @@ def load_tiff_file(filepath):
     img : ndarray
         The image
     """
-    return tifffile.imread(filepath)
+    im = Image.open(filepath)
+    return np.array(im)
 
 
 def get_image_files(folder, exposure_time = "300", filetype=".tif"):
