@@ -60,6 +60,7 @@ If you are a linux user, you can install the program by simply running:
 If this doesn't work, or you are on a different Operating system, you can run the same installation steps using these commands:
 
 ```pip install --upgrade pip setuptools```
+
 ```pip install -r requirements.txt```
 
 # Graphical User Interface (GUI)
@@ -90,7 +91,7 @@ Once it has finished, the "Open results folder" will become enabled and you can 
 
 Once installed and inside the "galleria_imaging" directory. The best way to run the program is in batch mode using the command:
 
-python -m analysis_suite path_to_folder -batch
+```python -m analysis_suite path_to_folder -ba```tch
 
 Where:
 path_to_folder is the path to the folder containing all the data you wish to analyse (including bioluminescence images)
@@ -100,7 +101,7 @@ Optional flag:
 
 ## Running the program on a single file
 
-python -m analysis_suite path_to_file
+```python -m analysis_suite path_to_file```
 
 Where:
 path_to_file is the path to the image you wish to analyse
