@@ -11,7 +11,7 @@ This tag needs to be passed into the analysis, either using the flag -exposure i
 
 # Installation 
 
-## Setting up python
+## Setting up Python
 
 Installing the Galleria Imaging analysis suite is relatively straightforward. The first step is to ensure you have python installed and working on your machine. 
 The installation method will vary depending on your operating system but there are plenty of tutorials / instructions available with a simple google search. 
@@ -27,6 +27,13 @@ Alternatively, by clicking on the green "code" button at the top of this page, t
 Once download, you need to move in to the folder in your terminal. This is done using the ```cd``` command:
 
 ```cd /path/to/galleria_imaging```
+
+## Downloading the model file
+
+
+TODO
+
+
 
 ## Installing the required modules 
 
