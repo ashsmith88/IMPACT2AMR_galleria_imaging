@@ -14,25 +14,24 @@ import skimage.filters as skfilt
 from skimage.measure import label
 import math
 
-#physical_devices = tf.config.experimental.list_physical_devices('GPU')
+physical_devices = tf.config.experimental.list_physical_devices('GPU')
 #assert len(physical_devices) > 0, "Not enough GPU hardware devices available"
-#config = tf.config.experimental.set_memory_growth(physical_devices[0], True)
+if len(physical_devices) > 0:
+    config = tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 def run_model(images):
-    print(tf.test.is_gpu_available())
     buff = 0
     while buff <= 1:
         try:
-            with tf.device("/cpu:0"):
-                tf.keras.backend.clear_session()
-                converted_images, zoom_factor = convert_image_size(images, buffer=buff)
-                model = "second_model.h5"
-                session = Session()
-                session.dataset = load_connector(converted_images)
-                session.load_model(model)
-                session.set_normalization('local')
-                all_wells = predict(session)
-                all_wells.shrink_images(zoom_factor)
+            tf.keras.backend.clear_session()
+            converted_images, zoom_factor = convert_image_size(images, buffer=buff)
+            model = "second_model.h5"
+            session = Session()
+            session.dataset = load_connector(converted_images)
+            session.load_model(model)
+            session.set_normalization('local')
+            all_wells = predict(session)
+            all_wells.shrink_images(zoom_factor)
             return all_wells
             break
         except:
