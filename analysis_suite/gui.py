@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QGridLayout,
     QLabel,
+    QLineEdit
 )
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
@@ -97,6 +98,9 @@ class MainWidget(QWidget):  # pylint: disable=too-many-instance-attributes
         self.addfolderbutton = QPushButton("Choose Folder")
         self.addfolderbutton.clicked.connect(self.parent().findfolder)
 
+        self.identifier_label_label = QLabel("Enter your file identifier below")
+        self.identifier_label_editor = QLineEdit("300")
+
         self.exitbutton = QPushButton("Exit")
         self.exitbutton.clicked.connect(self.parent().exit_gui)
 
@@ -129,10 +133,12 @@ class MainWidget(QWidget):  # pylint: disable=too-many-instance-attributes
         grid.addWidget(self.welcome, 0, 0, 1, 3)
         grid.addWidget(self.addfolder, 1, 0)
         grid.addWidget(self.addfolderbutton, 2, 0)
-        grid.addWidget(self.removeselectedfolder, 3, 0)
-        grid.addWidget(self.startbutton, 4, 0)
-        grid.addWidget(self.seeresults, 5, 0)
-        grid.addWidget(self.exitbutton, 6, 0)
+        grid.addWidget(self.identifier_label_label, 3, 0)
+        grid.addWidget(self.identifier_label_editor, 4, 0)
+        grid.addWidget(self.removeselectedfolder, 5, 0)
+        grid.addWidget(self.startbutton, 6, 0)
+        grid.addWidget(self.seeresults, 7, 0)
+        grid.addWidget(self.exitbutton, 8, 0)
 
         # set layout
         self.setLayout(grid)
@@ -163,6 +169,7 @@ class MainWidget(QWidget):  # pylint: disable=too-many-instance-attributes
         else:
             self.startbutton.setText('Stop Analysis')
 
+            self.file_identifier = self.identifier_label_editor.text()
             # self.setEnabled(False)
             for child in self.children():
                 if hasattr(child, "setEnabled"):
@@ -231,8 +238,10 @@ class AnalysisThread(QThread):  # pylint: disable=too-few-public-methods
     def run(self):
         """runs the analysis"""
         inputfolder = self.parent.currently_selected_folder
+        exposure = self.mainwidget.file_identifier
         dir_name = analysis.run_batch(
             inputfolder,
+            exposure=exposure,
             from_gui=True
         )
         self.finished_analysis.emit(dir_name)

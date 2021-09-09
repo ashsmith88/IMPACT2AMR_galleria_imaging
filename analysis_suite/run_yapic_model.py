@@ -25,7 +25,7 @@ def run_model(images):
         try:
             tf.keras.backend.clear_session()
             converted_images, zoom_factor = convert_image_size(images, buffer=buff)
-            model = "second_model.h5"
+            model = "Galleria_model.h5"
             session = Session()
             session.dataset = load_connector(converted_images)
             session.load_model(model)
