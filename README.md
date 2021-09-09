@@ -31,8 +31,11 @@ Once download, you need to move in to the folder in your terminal. This is done 
 ## Downloading the model file
 
 
-TODO
+To run the galleria detection, you will need to have the pre trained model inside your repository (in the main "galleria_imaging" folder).
 
+You can download the model using this link: https://drive.google.com/file/d/1dK_C3ExiqM4uABvMa59CH7-gfNG8K0OG/view?usp=sharing
+
+Note: Do not change the name of the file!
 
 
 ## Installing the required modules 
