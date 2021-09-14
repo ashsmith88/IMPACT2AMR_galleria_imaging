@@ -11,7 +11,7 @@ from skimage.filters import sobel, threshold_yen, gaussian
 import scipy.ndimage as ndi
 from scipy.stats import ttest_ind
 from skimage.segmentation import active_contour
-from skimage.external import tifffile
+#from skimage.external import tifffile
 import os
 import skimage.io as skio
 import skimage
@@ -22,8 +22,6 @@ def get_wells(img, labelled_wells):
         wells.append(region.intensity_image)
     return wells
 
-
-
 def save_wells_for_training(img, labelled_wells, tpoint, filename):
         ## this is simply for saving images to make labels for training
     for region in regionprops(labelled_wells, intensity_image=img):
@@ -32,7 +30,7 @@ def save_wells_for_training(img, labelled_wells, tpoint, filename):
         results_folder =  os.path.join(path, "well_results")
         if not os.path.isdir(results_folder):
             os.mkdir(results_folder)
-        tifffile.imsave(os.path.join(results_folder, "%s_T%s_well_%s_image.tif"%(date, tpoint, region.label)), region.intensity_image)
+        #tifffile.imsave(os.path.join(results_folder, "%s_T%s_well_%s_image.tif"%(date, tpoint, region.label)), region.intensity_image)
         #skio.imsave(os.path.join(results_folder, "%s_T%s_well_%s_image.png"%(date, tpoint, region.label)), skimage.color.grey2rgb(region.intensity_image))
 
 def detect_galleria(img, labelled_wells):

@@ -5,38 +5,31 @@ import sys
 import time
 import numpy as np
 import tensorflow as tf
-#from loading import load_tiff_file
 from numpy.testing import assert_equal
 from bigtiff import Tiff, PlaceHolder
 from pathlib import Path
-from yapic_io.tiff_connector import TiffConnector
 from yapic_io.dataset import Dataset
-import yapic_io.dataset as dset
-import yapic_io.utils as ut
 import scipy.ndimage as ndi
 import skimage.filters as skfilt
-import matplotlib.pyplot as plt
 from skimage.measure import label
-from skimage.external import tifffile
 import math
 
-
 physical_devices = tf.config.experimental.list_physical_devices('GPU')
-assert len(physical_devices) > 0, "Not enough GPU hardware devices available"
-config = tf.config.experimental.set_memory_growth(physical_devices[0], True)
+#assert len(physical_devices) > 0, "Not enough GPU hardware devices available"
+if len(physical_devices) > 0:
+    config = tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
-def run_model(images, zoom_factor=3):
+def run_model(images):
     buff = 0
     while buff <= 1:
         try:
             tf.keras.backend.clear_session()
-            converted_images, zoom_factor = convert_image_size(images, buffer=buff)#, zoom_factor=zoom_factor)
-            model = "second_model.h5"
+            converted_images, zoom_factor = convert_image_size(images, buffer=buff)
+            model = "Galleria_model.h5"
             session = Session()
             session.dataset = load_connector(converted_images)
             session.load_model(model)
             session.set_normalization('local')
-            #run_batch_model(session, in_folder)
             all_wells = predict(session)
             all_wells.shrink_images(zoom_factor)
             return all_wells
