@@ -1,4 +1,4 @@
-# galleria_imaging
+# IMPACT2AMR_galleria_imaging
 
 
 ## File naming convention
@@ -20,13 +20,13 @@ The installation method will vary depending on your operating system but there a
 
 Once you have python installed. You need to copy this repository onto your local system. This can be done using one simple command from inside your terminal window:
 
-```git clone git@github.com:ashsmith88/galleria_imaging.git```
+```git clone git@github.com:ashsmith88/IMPACT2AMR_galleria_imaging.git```
 
 Alternatively, by clicking on the green "code" button at the top of this page, there is the option to download the folder as a zip.
 
 Once download, you need to move in to the folder in your terminal. This is done using the ```cd``` command:
 
-```cd /path/to/galleria_imaging```
+```cd /path/to/IMPACT2AMR_galleria_imaging```
 
 ## Downloading the model file
 
